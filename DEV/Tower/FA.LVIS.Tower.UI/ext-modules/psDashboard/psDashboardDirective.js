@@ -1,14 +1,21 @@
-﻿/// <reference path="C:\Users\avidyarthi\Desktop\Tower\Tower\FA.LVIS.Tower.UI\Scripts/charts/angular-chart.js" />
-/// <reference path="C:\Users\avidyarthi\Desktop\Tower\Tower\FA.LVIS.Tower.UI\Scripts/charts/chart.min.js" />
-/// <reference path="C:\Users\avidyarthi\Desktop\Tower\Tower\FA.LVIS.Tower.UI\Scripts/angular.js" />
-"use strict";
+import React, { useEffect } from 'react';
 
-angular.module('psDashboard', ["chart.js"]).directive('psDashboard', function () {
-    return {
-     //   controller: 'psDashboardController',
-        templateUrl: 'ext-modules/psDashboard/psDashboardTemplate.html',
-        link: function (scope, element, attrs) {
-            
-        }
-    };
-});
+// Assuming psDashboardTemplate.html contents are converted to React component.
+// If psDashboardTemplate.html is complex, consider using a tool or library for conversion.
+import PsDashboardTemplate from './PsDashboardTemplate';
+
+const PsDashboard: React.FC = () => {
+
+  useEffect(() => {
+        // Equivalent to the AngularJS link function
+        // Add any initialization or cleanup code here
+  }, []);
+
+  return (
+    <div>
+      <PsDashboardTemplate />
+    </div>
+  );
+};
+
+export default PsDashboard;
