@@ -1,0 +1,12 @@
+import React from 'react';
+import './AppStyles.css'; // Adjust the path based on your project structure
+
+const MyComponent = () => {
+  return (
+    <div className="ps-dashboard">
+      {/* Your component content */}
+    </div>
+  );
+};
+
+export default MyComponent;
