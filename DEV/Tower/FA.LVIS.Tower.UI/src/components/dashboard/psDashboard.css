@@ -1,0 +1,14 @@
+// File: App.js
+import React from 'react';
+import Dashboard from './Dashboard'; // Import the Dashboard component
+
+function App() {
+  return (
+    <div>
+      <Dashboard />
+      {/* Further components */}
+    </div>
+  );
+}
+
+export default App;
