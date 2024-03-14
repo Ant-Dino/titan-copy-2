@@ -1,26 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
+import React, { useState, useEffect } from 'react';
+const App = () => {
+  const [currentUser, setCurrentUser] = useState<string>('');
+  const [tenantName, setTenantName] = useState<string>('');
+  const [activityRight, setActivityRight] = useState<string>('');
+  const [errors, setErrors] = useState({ unauthorized: false });
+  const [canManageAccessReq, setCanManageAccessReq] = useState<boolean>(false);
+  useEffect(() => {
+    // Simulate API call to fetch user data, rights, etc.
+    // Example:
+    setCurrentUser('John Doe');
+    setTenantName('Example Tenant');
+    setActivityRight('Admin');
+    setCanManageAccessReq(true);
+  }, []);
+  const OpenPopupWindow = () => {
+    console.log('Help popup opened');
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container-fluid">
+      <div antiforgerytoken="true"></div>
+      {errors.unauthorized ? (
+        <div className="alert alert-danger">
+          <div className="error"><i className="fa fa-lg fa-ban"> {errors.unauthorized}</i></div>
+        </div>
+      ) : (
+        <div>
+          {/* Replace ps-framework and its children with corresponding React components */}
+          {/* Example ps-framework component usage here */}
+          <div>
+            <p>Framework Placeholder</p>
+            {/* Example ps-menu-items could be separate components based on rights */}
+            <button onClick={OpenPopupWindow}>Help</button>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
+};
 export default App;
