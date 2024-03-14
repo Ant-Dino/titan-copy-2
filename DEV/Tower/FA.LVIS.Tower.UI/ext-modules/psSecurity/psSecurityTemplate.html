@@ -1,38 +1,135 @@
-﻿
-    <div ng-controller="psSecurityController as vm" ng-init="vm.getCurrentUser()" class="ps-dashboard-header">
-        <ul class="breadcrumb">
-            <li class="subbreadcrumb">
-                <ps-sub-menu>
-                    <ps-sub-menu-item label="Security Profiles" activetab="Security Profiles" route="security">Security Profiles</ps-sub-menu-item>
-                </ps-sub-menu>
-            </li>
-        </ul>
-        <div class="wrapper">
-            <div class="col-lg-1"></div>
-            <div class="col-lg-10">    
-                <ul class="ps-page-title">
-                    <li>Security Profiles</li>
-                </ul> 
-                <div growl inline="true"></div>
-                <button class="btn btn-sm" style="cursor:pointer" ng-show="hasModifyAccess" ng-click="addRow()"><i class="fa fa-user-plus"></i> Add New User</button>
-         
-                   <div id="serviceGrid" ui-grid="vm.serviceGrid"
-                        ui-grid-grouping
-                         ui-grid-move-columns
-                         ui-grid-cellnav
-                         ui-grid-selection
-                         ui-grid-resize-columns
-                         ui-grid-pinning
-                         ui-grid-auto-resize
-                         ui-grid-edit
-                         ui-grid-pagination
-                         ui-grid-custom-cell-select 
-                        class="ui-grid-selectable">
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Button, Modal, Spinner } from 'react-bootstrap';
+const PsSecurityComponent = () => {
+    const [currentUser, setCurrentUser] = useState({});
+    const [hasAccess, setHasAccess] = useState(false);
+    const [hasModifyAccess, setHasModifyAccess] = useState(false);
+    const [users, setUsers] = useState([]);
+    const [isBusy, setBusy] = useState(true);
+    const [error, setError] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [modalContent, setModalContent] = useState({});
+    const [tenants, setTenants] = useState([]);
+    const [showTenants, setShowTenants] = useState(false);
+    useEffect(() => {
+        fetchCurrentUser();
+        fetchTenants();
+    }, []);
+    const fetchCurrentUser = async () => {
+        try {
+            const response = await axios.get('Security/GetCurrentUser/');
+            const userInfo = response.data;
+            setCurrentUser(userInfo);
+            checkAccessRight(userInfo.ActivityRight);
+        } catch (error) {
+            setError('Failed to fetch user data');
+        }
+    };
+    const checkAccessRight = (activityRight) => {
+        if (activityRight === 'Admin' || activityRight === 'SuperAdmin') {
+            setHasAccess(true);
+        }
+        if (activityRight === 'SuperAdmin') {
+            setHasModifyAccess(true);
+        }
+    };
+    const fetchTenants = async () => {
+        try {
+            const response = await axios.get('Security/GetTenant');
+            setTenants(response.data);
+            setShowTenants(response.data.length > 0);
+        } catch (error) {
+            setError('Failed to fetch tenants');
+        }
+    };
+    const addUser = async user => {
+        try {
+            await axios.post('api/Security/Post', user);
+            fetchUsers(); // Re-fetch users to update list
+        } catch (error) {
+            setError('Failed to add user');
+        }
+    };
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.get('Security/GetUsers');
+            setUsers(response.data);
+            setBusy(false);
+        } catch (error) {
+            setError('Failed to fetch users');
+            setBusy(false);
+        }
+    };
+    if (isBusy) {
+        return <Spinner animation="border" />;
+    }
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
+    const handleCloseModal = () => setShowModal(false);
+    const handleShowModal = (content) => {
+        setModalContent(content);
+        setShowModal(true);
+    };
+    const tableRows = users.map(user => (
+        <tr key={user.ID}>
+            <td>{user.Name}</td>
+            <td>{user.Role}</td>
+            <td>{user.IsActive ? 'Yes' : 'No'}</td>
+            <td>{user.sTenant}</td>
+        </tr>
+    ));
+    return (
+        <div className="ps-dashboard-header">
+            <ul className="breadcrumb">
+                <li className="subbreadcrumb">
+                    <span>Security Profiles</span>
+                </li>
+            </ul>
+            <div className="wrapper">
+                <div className="col-lg-10">
+                    <ul className="ps-page-title">
+                        <li>Security Profiles</li>
+                    </ul>
+                    {hasModifyAccess && (
+                        <Button
+                            style={{ cursor: 'pointer'}}
+                            onClick={() => handleShowModal({type: 'add'})}
+                        >
+                            <i className="fa fa-user-plus"></i>Add New User
+                        </Button>
+                    )}
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Activity Rights</th>
+                                <th>Active</th>
+                                <th>Tenant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tableRows}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{modalContent.title}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{modalContent.body}</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Close
+                    </Button>
+                    <Button variant="primary" onClick={()=> addUser(modalContent.data)}>
+                        Save Changes
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
-        <div class="col-lg-1"> </div>
-    </div>
-
-
-
+    );
+};
+export default PsSecurityComponent;
