@@ -1,118 +1,158 @@
-﻿<div antiforgerytoken></div>
-<div class="ps-dashboard-header" ng-controller="psDashboardController as DashBoardCtrl" ng-init="DashBoardCtrl.getCurrentUser();">
-    <!--<ul class="breadcrumb">
-        <li class="subbreadcrumb">
-            <ps-sub-menu>
-                <ps-sub-menu-item label="Overview" route="overview"></ps-sub-menu-item>
-            </ps-sub-menu>
-        </li>
-    </ul>-->
-    <br /><br />
-    <div>
-        <div class="col-md-6">
-            <div class="widget widget-nopad">
-                <div class="widget-header">
-                    <i class="fa fa-exclamation-triangle" style="margin-left:0.5em"></i>
-                    <h3 style="margin:0px"> Business Exception Queue</h3>
-                </div>
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 
-                <div class="dashboard-widget-content" style="overflow-y:auto;">                 
-                    <div ng-show="!DashBoardCtrl.BEQSummaryList">
-                        <i class="fa fa-spinner fa-spin fa-3x fa-fw margin-bottom"></i>
-                        <span class="sr-only">Loading...</span>
-                    </div>
+ChartJS.register(BarElement, CategoryScale, LinearScale);
 
-                    <div class="shortcuts">
-                        <a href="#/businessexception/{{Exception.ExceptionName}}"   ng-class="{'shortcut shortcut-danger':Exception.NoOfExceptions >= Exception.ThreshholdCount,'shortcut shortcut-info':Exception.NoOfExceptions < Exception.ThreshholdCount}" ng-repeat="Exception in DashBoardCtrl.BEQSummaryList | limitTo:20">
-                                <span  ng-class="{'shortcut-header':Exception.NoOfExceptions >= Exception.ThreshholdCount,'shortcut-headerSuccess':Exception.NoOfExceptions < Exception.ThreshholdCount}">{{Exception.ExceptionName}}</span>
-                                <span class="value">{{Exception.NoOfExceptions}}</span><br />
-                                <span class="value">{{Exception.DateTime}}</span>
-                            </a>
+const Dashboard = () => {
+    const [currentUser, setCurrentUser] = useState({});
+    const [BEQSummaryList, setBEQSummaryList] = useState([]);
+    const [TEQSummaryList, setTEQSummaryList] = useState([]);
+    const [TEQGraphData, setTEQGraphData] = useState({});
+    const [BEQGraphData, setBEQGraphData] = useState({});
+
+    useEffect(() => {
+        getCurrentUser();
+    }, []);
+
+    const getCurrentUser = async () => {
+        try {
+            // Simulating getting user info, including permissions
+            const response = await axios.get('/currentUser');
+            setCurrentUser(response.data);
+            if (response.data.CanManageBEQ) {
+                loadBEQExceptions();
+                loadGraphicalBEQException();
+            }
+            if (response.data.CanManageTEQ) {
+                loadTEQExceptions();
+                loadGraphicalTEQException();
+            }
+        } catch (error) {
+            console.error("Error fetching current user", error);
+        }
+    };
+
+    const loadBEQExceptions = async () => {
+        try {
+            const response = await axios.get('Dashboard/BEQException/');
+            setBEQSummaryList(response.data);
+        } catch (error) {
+            console.error("Error fetching BEQ exceptions", error);
+        }
+    };
+
+    const loadTEQExceptions = async () => {
+        try {
+            const response = await axios.get('Dashboard/TEQException/');
+            setTEQSummaryList(response.data);
+        } catch (error) {
+            console.error("Error fetching TEQ exceptions", error);
+        }
+    };
+
+    const loadGraphicalBEQException = async () => {
+        try {
+            const response = await axios.get('Dashboard/GraphicalBEQException/');
+            setBEQGraphData(formatGraphData(response.data));
+        } catch (error) {
+            console.error("Error fetching graphical BEQ exception data", error);
+        }
+    };
+
+    const loadGraphicalTEQException = async () => {
+        try {
+            const response = await axios.get('Dashboard/GraphicalTEQException/');
+            setTEQGraphData(formatGraphData(response.data));
+        } catch (error) {
+            console.error("Error fetching graphical TEQ exception data", error);
+        }
+    };
+
+    const formatGraphData = (graphData) => {
+        const labels = [];
+        const data = {
+            New: [],
+            Active: [],
+            Hold: [],
+            Resolved: [],
+        };
+
+        graphData.forEach((item) => {
+            labels.push(item.Hour);
+            data.New.push(item.NewCount);
+            data.Active.push(item.ActiveCount);
+            data.Hold.push(item.HoldCount);
+            data.Resolved.push(item.ArchiveCount); // Assuming ArchiveCount is Resolved
+        });
+
+        return { labels, datasets: Object.keys(data).map(key => ({ label: key, data: data[key] })) };
+    };
+
+    const options = {
+        maintainAspectRatio: false,
+        scales: {
+            x: { stacked: true },
+            y: { stacked: true }
+        },
+        legend: {
+            display: true,
+            position: "bottom"
+        }
+    };
+
+    return (
+        <div>
+            <div className="col-md-6">
+                <div className="widget widget-nopad">
+                    <div className="widget-header">
+                        <i className="fa fa-exclamation-triangle" style={{ marginLeft: "0.5em" }}></i>
+                        <h3 style={{ margin: "0px" }}>Business Exception Queue</h3>
                     </div>
-                    <!-- /shortcuts -->
+                    <div className="dashboard-widget-content" style={{ overflowY: "auto" }}>
+                        {!BEQSummaryList && (
+                            <div>
+                                <i className="fa fa-spinner fa-spin fa-3x fa-fw margin-bottom"></i>
+                                <span className="sr-only">Loading...</span>
+                            </div>
+                        )}
+                        <div className="shortcuts">
+                            {BEQSummaryList.map((Exception, index) => (
+                                <a href={`#/businessexception/${Exception.ExceptionName}`} key={index}
+                                    className={`shortcut ${Exception.NoOfExceptions >= Exception.ThresholdCount ? 'shortcut-danger' : 'shortcut-info'}`}>
+                                    <span className={Exception.NoOfExceptions >= Exception.ThresholdCount ? 'shortcut-header' : 'shortcut-headerSuccess'}>
+                                        {Exception.ExceptionName}
+                                    </span>
+                                    <span className="value">{Exception.NoOfExceptions}</span><br />
+                                    <span className="value">{Exception.DateTime}</span>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-                <!-- /widget-content -->
+            </div>
+            <div className="col-md-6">
+                <div className="widget">
+                    <div className="widget-header">
+                        <i className="icon-signal"></i>
+                        <h3 style={{ margin: "0px" }}>Technical Exceptions</h3>
+                    </div>
+                    <div className="dashboard-widget-content">
+                        {!TEQGraphData.datasets && (
+                            <div>
+                                <i className="fa fa-spinner fa-spin fa-3x fa-fw margin-bottom"></i>
+                                <span className="sr-only">Loading...</span>
+                            </div>
+                        )}
+                        {TEQGraphData.datasets && (
+                            <Bar data={TEQGraphData} options={options} height={280} width={950} />
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="widget">
-                <div class="widget-header">
-                    <i class="icon-signal"></i>
-                    <h3 style="margin:0px">Business Exceptions</h3>
-                </div>
-                <!-- /widget-header -->
-                <div class="dashboard-widget-content" ng-controller="BEQLineCtrl as LnCtrl">
-                    <div ng-show="!LnCtrl.data">
-                        <i class="fa fa-spinner fa-spin fa-3x fa-fw margin-bottom"></i>
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <!--<canvas id="beqline" class="chart chart-line" chart-data="LnCtrl.data"
-                            chart-labels="LnCtrl.labels" chart-legend="true" chart-series="LnCtrl.series"
-                            chart-click="LnCtrl.onClick" height="280" width="950" chart-colours="LnCtrl.Colours"></canvas>-->
-                    <canvas id="beqline" class="chart-bar" chart-data="LnCtrl.data" chart-labels="LnCtrl.labels"
-                            chart-colors="LnCtrl.Colours"
-                            chart-dataset-override="LnCtrl.datasetOverride" height="280" width="950" chart-options="LnCtrl.optionsMixed" chart-legend="true"></canvas> 
-                  
-                    <!-- /area-chart -->
-                </div>
-                <!-- /widget-content -->
-            </div>
-        </div>
-    </div>
-    <div>
-        <div class="col-md-6">
-            <div class="widget widget-nopad">
-                <div class="widget-header">
-                    <i class="fa fa-exclamation-triangle" style="margin-left:0.5em"></i>
-                    <h3 style="margin:0px">Technical Exception Queue</h3>
-                </div>
-                <!-- /widget-header -->
-                <div class="dashboard-widget-content" style="overflow-y:auto;">
-                    <div ng-show="!DashBoardCtrl.TEQSummaryList">
-                        <i class="fa fa-spinner fa-spin fa-3x fa-fw margin-bottom"></i>
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <div class="shortcuts">
-                        <a  href="#/Exceptions/{{Exception.ExceptionName}}" ng-class="{'shortcut shortcut-danger':Exception.NoOfExceptions >= Exception.ThreshholdCount,'shortcut shortcut-info':Exception.NoOfExceptions < Exception.ThreshholdCount}"  ng-repeat="Exception in DashBoardCtrl.TEQSummaryList | limitTo:100">
-                            <span ng-class="{'shortcut-header':Exception.NoOfExceptions >= Exception.ThreshholdCount,'shortcut-headerSuccess':Exception.NoOfExceptions < Exception.ThreshholdCount}">{{Exception.ExceptionName}}</span>
-                            <span class="value">{{Exception.NoOfExceptions}}</span><br />
-                            <span class="value">{{Exception.DateTime}}</span>
-                        </a>
-                    </div>
-                </div>
-                <!-- /widget-content -->
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="widget">
-                <div class="widget-header">
-                    <i class="icon-signal"></i>
-                    <h3 style="margin:0px">Technical Exceptions</h3>
-                </div>
-                <!-- /widget-header -->
-                <!-- /widget-content -->
-                <div class="dashboard-widget-content" ng-controller="TEQLineCtrl as teqLnchartCtrl">
-                    <div ng-show="!teqLnchartCtrl.data">
-                        <i class="fa fa-spinner fa-spin fa-3x fa-fw margin-bottom"></i>
-                        <span class="sr-only">Loading...</span>
-                    </div>
+    );
+};
 
-                    <canvas id="teqline" class="chart-bar" chart-data="teqLnchartCtrl.data" chart-labels="teqLnchartCtrl.labels"
-                            chart-colors="teqLnchartCtrl.Colours" 
-                            chart-dataset-override="teqLnchartCtrl.datasetOverride" height="280" width="950" chart-options="teqLnchartCtrl.optionsMixed" chart-legend="true"></canvas> 
-
-                    <!--<canvas id="teqline" class="chart-bar"
-                            chart-data="teqLnchartCtrl.data" chart-labels="teqLnchartCtrl.labels" chart-colors="teqLnchartCtrl.Colours"
-                            chart-dataset-override="teqLnchartCtrl.datasetOverride"></canvas>--> 
-                    <!--<canvas id="teqline" class="chart chart-line" chart-data="teqLnchartCtrl.data"
-                            chart-labels="teqLnchartCtrl.labels" chart-legend="true" chart-series="teqLnchartCtrl.series"
-                            chart-click="teqLnchartCtrl.onClick" height="250" width="950" chart-colours="teqLnchartCtrl.Colours"></canvas>-->
-                    
-                    <!-- /area-chart -->
-                </div>
-                <!-- /widget-content -->
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Placed at the end of the document so the pages load faster -->
+export default Dashboard;
