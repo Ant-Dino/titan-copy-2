@@ -1,38 +1,71 @@
-﻿
-    <div ng-controller="psSecurityController as vm" ng-init="vm.getCurrentUser()" class="ps-dashboard-header">
-        <ul class="breadcrumb">
-            <li class="subbreadcrumb">
-                <ps-sub-menu>
-                    <ps-sub-menu-item label="Security Profiles" activetab="Security Profiles" route="security">Security Profiles</ps-sub-menu-item>
-                </ps-sub-menu>
-            </li>
-        </ul>
-        <div class="wrapper">
-            <div class="col-lg-1"></div>
-            <div class="col-lg-10">    
-                <ul class="ps-page-title">
-                    <li>Security Profiles</li>
-                </ul> 
-                <div growl inline="true"></div>
-                <button class="btn btn-sm" style="cursor:pointer" ng-show="hasModifyAccess" ng-click="addRow()"><i class="fa fa-user-plus"></i> Add New User</button>
-         
-                   <div id="serviceGrid" ui-grid="vm.serviceGrid"
-                        ui-grid-grouping
-                         ui-grid-move-columns
-                         ui-grid-cellnav
-                         ui-grid-selection
-                         ui-grid-resize-columns
-                         ui-grid-pinning
-                         ui-grid-auto-resize
-                         ui-grid-edit
-                         ui-grid-pagination
-                         ui-grid-custom-cell-select 
-                        class="ui-grid-selectable">
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Button, Modal, Alert } from 'react-bootstrap';
+function PsSecurityComponent() {
+    const [currentUser, setCurrentUser] = useState(null);
+    const [serviceGridData, setServiceGridData] = useState([]);
+    const [tenant, setTenant] = useState('');
+    const [hasAccess, setHasAccess] = useState(false);
+    const [hasModifyAccess, setHasModifyAccess] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
+    useEffect(() => {
+        axios.get('Security/GetCurrentUser/')
+            .then(response => {
+                const userData = response.data;
+                setCurrentUser(userData);
+                checkAccessRights(userData.ActivityRight); // Simulate access rights checking
+            }).catch(() => {
+                setIsError(true);
+            }).finally(() => {
+                setIsLoading(false);
+            });
+
+        fetchData('Security/GetUsers', setServiceGridData);
+        fetchData('Security/GetTenant', setTenant);
+    }, []);
+    function fetchData(endpoint, stateSetter) {
+        axios.get(endpoint)
+            .then(response => {
+                stateSetter(response.data);
+            }).catch(() => {
+                setIsError(true);
+            });
+    }
+    function checkAccessRights(activityRight) {
+        if (['Admin', 'SuperAdmin'].includes(activityRight)) {
+            setHasAccess(true);
+        }
+        if (activityRight === 'SuperAdmin') {
+            setHasModifyAccess(true);
+        }
+    }
+    function addRow() {
+        console.log('Add row function called.');
+        // Implement add row functionality
+    }
+    if (isLoading) return <div>Loading...</div>;
+    if (isError) return <div>Error occurred</div>;
+    return (
+        <div className="ps-dashboard-header">
+            <ul className="breadcrumb">
+                <li className="subbreadcrumb">
+                    <ps-sub-menu>
+                        <ps-sub-menu-item label="Security Profiles" activetab="Security Profiles" route="security">Security Profiles</ps-sub-menu-item>
+                    </ps-sub-menu>
+                </li>
+            </ul>
+            <div className="wrapper">
+                <div className="col-lg-10">
+                    <ul className="ps-page-title">
+                        <li>Security Profiles</li>
+                    </ul>
+                    <Button className="btn btn-sm" style={{cursor: 'pointer'}} onClick={addRow} disabled={!hasModifyAccess}><i className="fa fa-user-plus"></i> Add New User</Button>
+
+                    {/* Service Grid Component Placeholder */}
                 </div>
             </div>
         </div>
-        <div class="col-lg-1"> </div>
-    </div>
-
-
-
+    );
+}
+export default PsSecurityComponent;
