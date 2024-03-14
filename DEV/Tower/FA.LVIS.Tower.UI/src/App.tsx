@@ -1,26 +1,29 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Dashboard from 'DEV/Tower/FA.LVIS.Tower.UI/src/components/dashboard';
+import Help from 'DEV/Tower/FA.LVIS.Tower.UI/src/components/help';
+// Define the App component using TypeScript and React hooks
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        {/* Switch component is used to render only the first route that matches the location */}
+        <Switch>
+          {/* Define route for Dashboard component */}
+          <Route path='/dashboard'>
+            <Dashboard />
+          </Route>
+          {/* Define route for Help component */}
+          <Route path='/help'>
+            <Help />
+          </Route>
+          {/* Redirect to Dashboard as a default route */}
+          <Route path='/'>
+            <Dashboard />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   );
-}
-
+};
 export default App;
