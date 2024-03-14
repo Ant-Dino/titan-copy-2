@@ -1,51 +1,82 @@
-﻿<!DOCTYPE html>
-<html ng-app="app">
-<head>
-    <title>Tower v1.0</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300" rel="stylesheet" type="text/css">
+import React, { useState, useEffect } from 'react';
 
-    <link href="Content/bootstrap.min.css" rel="stylesheet" />
-    <link href="Content/ui-grid.css" rel="stylesheet" />
-    <link href="Content/font-awesome.min.css" rel="stylesheet" />
-    <link href="towercss" rel="stylesheet" />
+import 'Content/bootstrap.min.css';
+import 'Content/ui-grid.css';
+import 'Content/font-awesome.min.css';
+import 'towercss';
+// Note: You should import your scripts here if they're compatible with React or rewrite their logic within components.
 
-    <script src="towerjqscripts" type="text/javascript"></script>
-    <script src="towerangularscripts" type="text/javascript"></script>
-    <script src="towerscripts" type="text/javascript"></script>
-    <script src="towersubmenuscripts" type="text/javascript"></script>
+interface ErrorState {
+    unauthorized: string;
+}
 
-</head>
+interface MenuItemProps {
+    label: string;
+    route: string;
+    icon: string;
+    displayCondition?: boolean;
+}
 
-<body class="container-fluid" ng-controller="appController">
-    <div antiforgerytoken></div>
-    <div ng-show="errors.unauthorized">
-        <div class="alert alert-danger">
-            <div class="error"><i class="fa fa-lg fa-ban"> {{ errors.unauthorized }}</i></div>
+const MenuItem: React.FC<MenuItemProps> = ({ label, route, icon, displayCondition = true }) => {
+    if (!displayCondition) return null;
+
+    // Logic for handling route change or click event should go here.
+    // This is a placeholder function. You might use react-router-dom for navigation, for example.
+    const handleClick = () => {
+        console.log(`Navigating to ${route}`);
+    };
+
+    return (
+        <div className={`fa ${icon}`} onClick={handleClick}>
+            {label}
         </div>
-    </div>
+    );
+};
 
-    <div ng-show="!errors.unauthorized">
-        <div>
-            <ps-framework icon-file="images/FirstAmericanLogo.png" currentuser="{{ currentuser }}" tenantname="{{ tenantname }}">
-                <ps-menu>
-                    <ps-menu-item label="Home" route="dashboard" icon="fa-dashboard"></ps-menu-item>
-                    <ps-menu-item label="Reporting" route="reporting" icon="fa-line-chart"></ps-menu-item>
-                    <ps-menu-item label="Mapping Tables" route="Customermappings" icon="fa-cogs"></ps-menu-item>
-                    <ps-menu-item label="Auditing" route="auditing" ng-show="(activityright === 'Admin') || (activityright === 'SuperAdmin')" icon="fa-bars"></ps-menu-item>
-                    <ps-menu-item label="Exceptions" route="businessexception" icon="fa-exclamation-triangle"></ps-menu-item>
-                    <ps-menu-item label="Security" route="security" ng-show="(activityright === 'Admin') || (activityright === 'SuperAdmin')" icon="fa-lock"></ps-menu-item>
-                    <ps-menu-item label="Utilities" route="confirmservicerequest" ng-show="(activityright === 'SuperAdmin') " icon="fa-wrench"></ps-menu-item>
-                    <ps-menu-item label="Access Request" route="AccessRequest" ng-show="canmanageaccessreq" icon="fa-key"></ps-menu-item>
-                    <ps-menu-item label="Help" route="help" icon="fa-info-circle" ng-click="OpenPopupWindow()"></ps-menu-item>
-                </ps-menu>
-            </ps-framework>
+const App: React.FC = () => {
+    const [errors, setErrors] = useState<ErrorState>({ unauthorized: '' });
+    const [currentUser, setCurrentUser] = useState<string>('');
+    const [tenantName, setTenantName] = useState<string>('');
+    const [activityRight, setActivityRight] = useState<string>('');
+    const [canManageAccessReq, setCanManageAccessReq] = useState<boolean>(false);
+
+    // Logic to fetch user data, permissions, etc., would go here
+    useEffect(() => {
+        // Mock fetching data
+        setCurrentUser('John Doe');
+        setTenantName('Some Tenant');
+        setActivityRight('Admin');
+        setCanManageAccessReq(true);
+    }, []);
+
+    return (
+        <div className="container-fluid">
+            {errors.unauthorized && (
+                <div className="alert alert-danger">
+                    <div className="error"><i className="fa fa-lg fa-ban"> {errors.unauthorized}</i></div>
+                </div>
+            )}
+            {!errors.unauthorized && (
+                <div>
+                    {/* Placeholder for ps-framework equivalent in React */}
+                    <div iconFile="images/FirstAmericanLogo.png" currentUser={currentUser} tenantName={tenantName}>
+                        {/* Placeholder for ps-menu equivalent in React */}
+                        <div>
+                            <MenuItem label="Home" route="dashboard" icon="fa-dashboard" />
+                            <MenuItem label="Reporting" route="reporting" icon="fa-line-chart" />
+                            <MenuItem label="Mapping Tables" route="Customermappings" icon="fa-cogs" />
+                            <MenuItem label="Auditing" route="auditing" displayCondition={["Admin", "SuperAdmin"].includes(activityRight)} icon="fa-bars" />
+                            <MenuItem label="Exceptions" route="businessexception" icon="fa-exclamation-triangle" />
+                            <MenuItem label="Security" route="security" displayCondition={["Admin", "SuperAdmin"].includes(activityRight)} icon="fa-lock" />
+                            <MenuItem label="Utilities" route="confirmservicerequest" displayCondition={activityRight === 'SuperAdmin'} icon="fa-wrench" />
+                            <MenuItem label="Access Request" route="AccessRequest" displayCondition={canManageAccessReq} icon="fa-key" />
+                            <MenuItem label="Help" route="help" icon="fa-info-circle" onClick={() => console.log('Open help popup')} />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-    </div>
-</body>
-</html>
+    );
+};
+
+export default App;
