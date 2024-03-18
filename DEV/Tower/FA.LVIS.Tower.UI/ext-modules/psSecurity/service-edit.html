@@ -1,68 +1,144 @@
-﻿<div antiforgerytoken></div><div>    
-    <div class="widget-header">
-        <button type="button" class="close" ng-click="$close()" aria-hidden="true">&times;</button>
-        <i class="fa fa-2x fa-pencil-square-o"></i>
+import React, { useState, useEffect } from 'react';
+type UserProfileProps = {
+  userInfo: any;
+  tenants: any[];
+  applicationRoles: string[];
+  manageTenantAccess: boolean;
+  showTenants: boolean;
+  hasExceptionManageAccess: boolean;
+  hasAccessRightAccess: boolean;
+  saveProfile: () => void;
+  closeProfile: () => void;
+const UserProfile: React.FC<UserProfileProps> = ({
+  userInfo,
+  tenants,
+  applicationRoles,
+  manageTenantAccess,
+  showTenants,
+  hasExceptionManageAccess,
+  hasAccessRightAccess,
+  saveProfile,
+  closeProfile,
+  const [user, setUser] = useState(userInfo);
+  useEffect(() => {
+    setUser(userInfo);
+  }, [userInfo]);
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUser({ ...user, [event.target.name]: event.target.checked });
+  };
+  const handleSave = () => {
+    saveProfile();
+  };
+  return (
+    <div>
+      <div className="widget-header">
+        <button type="button" className="close" aria-hidden="true" onClick={closeProfile}>&times;</button>
+        <i className="fa fa-2x fa-pencil-square-o"></i>
         <h3>Edit User Profile</h3>
-    </div>
-    <div class="widget-content">        
-        <form name="serviceForm" class="serviceForm" novalidate>
-            <div class="well well-sm">
-                <b> User Profile</b>
+      </div>
+      <div className="widget-content">
+        <form className="serviceForm">
+          <div className="well well-sm">
+            <b> User Profile</b>
+          </div>
+          <div className="form-group">
+            <label>User Id</label>
+            <input className="input" type="text" disabled value={user.UserName} />
+          </div>
+          <div className="form-group">
+            <label>Name</label>
+            <input className="input" type="text" disabled value={user.Name} />
+          </div>
+          {showTenants && (
+            <div className="form-group">
+              <label>Tenant</label>
+              <select
+                disabled={!manageTenantAccess}
+                value={user.TenantId}
+                onChange={(e) => setUser({ ...user, TenantId: e.target.value })}
+              >
+                {tenants.map((obj, index) => (
+                  <option key={index} value={obj.TenantId}>
+                    {obj.TenantName}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div growl inline="true" limit-messages="1"></div>
-            <div class="form-group">
-                <label>User Id</label>
-                <input class="input" type="text"  disabled value="{{vm.entity.UserName}}" required />
-            </div>
-            <div class="form-group">
-                <label>Name</label>
-                <input class="input" type="text" disabled ng-model="vm.entity.Name"  required/>
-            </div>
-            <div class="form-group" ng-show="vm.ShowTenants">
-                <label>Tenant</label>
-                <select ng-model="vm.entity.TenantId" ng-disabled="!vm.MangeTenantAccess" ng-options="obj.TenantId as obj.TenantName for obj in vm.Tenants | orderBy:'TenantName'"></select> 
-            </div>
-            <div class="form-group">
-                <label class="label-md">Activity Rights</label>
-                <label class="radio-inline radio-inline-modified" ng-repeat="Rights in vm.ApplicationRoles">
-                    <input class="input" type="radio" name="ActivityRadio" ng-model="vm.entity.Role" ng-value="Rights" required/>{{Rights}}
-                </label>
-            </div>
-
-            <div class="form-group">
-                <label style="width:145px">
-                    Active
-                    <input class="input" type="checkbox" ng-model="vm.entity.IsActive" ng-true-value="true" ng-false-value="false">
-                </label>
-            </div>
-       
-            <div class="well well-sm" ng-show="vm.hasExceptionManageAccess">
+          )}
+          <div className="form-group">
+            <label>Activity Rights</label>
+            {applicationRoles.map((Rights, index) => (
+              <label className="radio-inline radio-inline-modified" key={index}>
+                <input
+                  type="radio"
+                  name="ActivityRadio"
+                  checked={user.Role === Rights}
+                  onChange={() => setUser({ ...user, Role: Rights })}
+                />
+                {Rights}
+              </label>
+            ))}
+          </div>
+          <div className="form-group">
+            <label>
+              Active
+              <input
+                type="checkbox"
+                name="IsActive"
+                checked={user.IsActive}
+                onChange={handleCheckboxChange}
+              />
+            </label>
+          </div>
+          {hasExceptionManageAccess && (
+            <>
+              <div className="well well-sm">
                 <b>User Rights</b>
-            </div>
-            <div class="form-group" ng-show="vm.hasExceptionManageAccess">
-                <label class="label-lg">
-                    Manage TEQ
-                    <input type="checkbox" ng-model="vm.entity.ManageTEQ" ng-true-value="true" ng-false-value="false">
+              </div>
+              <div className="form-group">
+                <label>
+                  Manage TEQ
+                  <input
+                    type="checkbox"
+                    name="ManageTEQ"
+                    checked={user.ManageTEQ}
+                    onChange={handleCheckboxChange}
+                  />
                 </label>
-            </div>
-            <div class="form-group" ng-show="vm.hasExceptionManageAccess">
-                <label class="label-lg">
-                    Manage BEQ
-                    <input class="input" type="checkbox" ng-model="vm.entity.ManageBEQ" ng-true-value="true" ng-false-value="false">
+              </div>
+              <div className="form-group">
+                <label>
+                  Manage BEQ
+                  <input
+                    type="checkbox"
+                    name="ManageBEQ"
+                    checked={user.ManageBEQ}
+                    onChange={handleCheckboxChange}
+                  />
                 </label>
+              </div>
+            </>
+          )}
+          {hasAccessRightAccess && (
+            <div className="form-group">
+              <label>
+                  Manage Access Request
+                  <input
+                    type="checkbox"
+                    name="ManageAccessREQ"
+                    checked={user.ManageAccessREQ}
+                    onChange={handleCheckboxChange}
+                  />
+              </label>
             </div>
-            <div class="form-group" ng-show="vm.hasAccessrightAccess">
-                <label class="label-lg">
-                    Manage Access Request
-                    <input class="input" type="checkbox" ng-model="vm.entity.ManageAccessREQ" ng-true-value="true" ng-false-value="false">
-                </label>
-            </div>
-
+          )}
         </form>
-
+      </div>
+      <div className="modal-footer">
+        <button className="btn btn-success" disabled={!user.IsActive} onClick={handleSave}>Save</button>
+        <button className="btn btn-primary" onClick={closeProfile}>Cancel</button>
+      </div>
     </div>
-    <div class="modal-footer">
-        <button class="btn btn-success" ng-disabled="serviceForm.$invalid && !hasModifyAccess|| !serviceForm.$dirty" ng-click="vm.save()">Save</button>
-        <button class="btn btn-primary" ng-click="$close()">Cancel</button>
-    </div>
-</div>
+  );
+};
+export default UserProfile;
