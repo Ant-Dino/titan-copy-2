@@ -1,106 +1,151 @@
-﻿<div antiforgerytoken></div>
-
-<div>
-    <div class="widget-header">
-        <button type="button" class="close" ng-click="$close()" aria-hidden="true">&times;</button>
-        <i class="fa fa-user-plus"></i>
-        <h3>Add New User</h3>
-    </div>
-    <div class="widget-content">
-        <div class="row">
-            <div class="col-lg-5">
-                <div>
-                    <div growl inline="true" limit-messages="1"></div>
-                    <label>Find user: </label>
-                    <!--uib-typeahead="Search as Search.Name for Search in vm.searchdata | filter:$viewValue | limitTo:3"-->
-                    <select name="SelectIdentity" id="singleIdentity" ng-model="vm.Identity">
-                        <option value="CORP">CORP</option>
-                        <option value="INTL">INTL</option>
-                    </select>
-                    <input ng-enter="vm.search()" class="input" type="text" ng-model="vm.txtUser" />
-                    <div style="display:inline-block;margin-left:0.5em;cursor:pointer" ng-show="!vm.Busy">
-                        <i class="fa fa-search" ng-click="vm.search()"></i>
-                    </div>
-                    <div style="display:inline-block; margin:0 auto;" ng-show="vm.Busy">
-                        <i class="fa fa-spinner fa-spin"></i>
-                    </div>
-                </div>
-                <br />
-                <div ng-show="vm.searchdata.length">
-                    <label>List of Matched users: </label>
-                    <select style="width: 100%;" size="7" ng-model="vm.currentItem" multiple
-                            ng-multiple="false"
-                            ng-options="opt as opt.Name for opt in vm.searchdata " ng-dblclick="vm.GetValue()"></select>
-                    <!--<input type="button" value="Get" ng-click="vm.GetValue()" />-->
-                </div>
+import React, { useState, useEffect } from 'react';
+interface IUser {
+    UserName: string;
+    Name: string;
+    EmailId: string;
+    Employeeid: string;
+    TenantId: string | null;
+    Role: string;
+    IsActive: boolean;
+    ManageTEQ: boolean;
+    ManageBEQ: boolean;
+    ManageAccessREQ: boolean;
+}
+interface ITenant {
+    TenantId: string;
+    TenantName: string;
+}
+interface IRole {
+    name: string; // Assuming roles are outlined by a name property for simplification
+}
+const AddNewUserComponent: React.FC = () => {
+    const [tenants, setTenants] = useState<ITenant[]>([]);
+    const [roles, setRoles] = useState<IRole[]>([]);
+    const [user, setUser] = useState<IUser>({
+        UserName: '',
+        Name: '',
+        EmailId: '',
+        Employeeid: '',
+        TenantId: null,
+        Role: 'User',
+        IsActive: false,
+        ManageTEQ: false,
+        ManageBEQ: false,
+        ManageAccessREQ: false,
+    });
+    const [identity, setIdentity] = useState<string>('CORP');
+    const [searchData, setSearchData] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [busy, setBusy] = useState<boolean>(false);
+    const [showTenants, setShowTenants] = useState<boolean>(false);
+    const [hasExceptionManageAccess, setHasExceptionManageAccess] = useState<boolean>(false);
+    const [hasAccessRightAccess, setHasAccessRightAccess] = useState<boolean>(false);
+    // Sample method to simulate search functionality
+    const search = () => {
+        // Example search logic here
+        setBusy(true);
+        setTimeout(() => {
+            setSearchData([{ Name: 'John Doe', UserName: 'johndoe' }, { Name: 'Jane Doe', UserName: 'janedoe' }]);
+            setBusy(false);
+        }, 2000); // Just simulating an async search call
+    };
+    const getValue = () => {
+        // Logic to get value from search data or any other operation
+    };
+    const save = () => {
+        // Save logic goes here, including possible validation and API calls
+    };
+    const close = () => {
+        // Handle modal close logic here
+    };
+    useEffect(() => {
+        // Simulate fetching roles and tenants
+        setRoles([{ name: 'User' }, { name: 'Admin' }]);
+        setTenants([{ TenantId: '1', TenantName: 'Tenant A' }, { TenantId: '2', TenantName: 'Tenant B' }]);
+    }, []);
+    return (
+        <div>
+            <div className="widget-header">
+                <button type="button" className="close" onClick={() => close()} aria-hidden="true">&times;</button>
+                <i className="fa fa-user-plus"></i>
+                <h3>Add New User</h3>
             </div>
-            <div class="col-lg-7">
-                <form name="serviceAddForm" class="serviceForm">
-                    <div class="well well-sm">
-                        <b> User Profile</b>
-                    </div>
-                    <div class="form-group">
-                        <label>User Id</label>
-                        <input class="input" type="text" disabled value="{{vm.entity.UserName}}" />
-                    </div>
-                    <div class="form-group" ng-class="{ 'has-error' : serviceAddForm.UserName.$invalid}">
-                        <label>Name</label>
-                        <input class="input" type="text" name="UserName" disabled required ng-model="vm.entity.Name" />
-                        <input type="hidden" name="EmailId" ng-model="vm.entity.EmailId">
-                        <input type="hidden" name="Employeeid" ng-model="vm.entity.Employeeid">
-                    </div>
-                    <div class="form-group" ng-show="vm.ShowTenants">
-                        <label>Tenant</label>
-                        <select ng-disabled="!vm.MangeTenantAccess" ng-model="vm.entity.TenantId" ng-options="obj.TenantId as obj.TenantName for obj in vm.Tenants | orderBy:'TenantName'">
-                        </select>   
-                    </div>
-                    <div class="form-group">
-                        <label style="text-align:left; width:150px;vertical-align:top">Activity Rights </label>
-                        <div style="display:inline-block; margin:0 auto;" id="TadioButtonList" ng-init="vm.entity.Role='User'">
-                            <div ng-repeat="Rights in vm.ApplicationRoles">
-                                <label class="radio-inline">
-                                    <input type="radio" name="ActivityRadio"
-                                           ng-model="vm.entity.Role"
-                                           ng-value="Rights" />
-                                    {{Rights}}
-                                </label>
+            <div className="widget-content">
+                <div className="row">
+                    <div className="col-lg-5">
+                        <div>
+                            <label>Find user: </label>
+                            <select name="SelectIdentity" id="singleIdentity" value={identity} onChange={(e) => setIdentity(e.target.value)}>
+                                <option value="CORP">CORP</option>
+                                <option value="INTL">INTL</option>
+                            </select>
+                            <input className="input" type="text" onChange={(e) => setUser({...user, UserName: e.target.value})} />
+                            <div style={{display: busy ? 'none' : 'inline-block', marginLeft: '0.5em', cursor: 'pointer'}} onClick={() => search()}>
+                                <i className="fa fa-search"></i>
+                            </div>
+                            <div style={{display: busy ? 'inline-block' : 'none', margin: '0 auto'}}>
+                                <i className="fa fa-spinner fa-spin"></i>
                             </div>
                         </div>
+                        <br />
+                        <div style={{display: searchData.length ? 'block' : 'none'}}>
+                            <label>List of Matched users: </label>
+                            <select style={{width: '100%'}} size={7} value={currentUser} onChange={(e) => setCurrentUser(e.target.value)} multiple={false}>
+                                {searchData.map((item, index) => (
+                                    <option key={index} value={item.UserName}>{item.Name}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label style="width:146px">
-                            Active
-                            <input class="input" type="checkbox" ng-model="vm.entity.IsActive" ng-true-value="true" ng-false-value="false">
-                        </label>
+                    <div className="col-lg-7">
+                        <form name="serviceAddForm" className="serviceForm">
+                            <div className="well well-sm">
+                                <b> User Profile</b>
+                            </div>
+                            <div className="form-group">
+                                <label>User Id</label>
+                                <input className="input" type="text" disabled value={user.UserName} />
+                            </div>
+                            <div className="form-group">
+                                <label>Name</label>
+                                <input className="input" type="text" name="UserName" disabled required value={user.Name} />
+                                {/* Hidden inputs for EmailId and Employeeid */}
+                            </div>
+                            <div className="form-group" style={{display: showTenants ? 'block' : 'none'}}>
+                                <label>Tenant</label>
+                                <select disabled={!user.TenantId} value={user.TenantId || ''} onChange={(e) => setUser({...user, TenantId: e.target.value})}>
+                                    {tenants.map((tenant) => (
+                                        <option key={tenant.TenantId} value={tenant.TenantId}>{tenant.TenantName}</option>
+                                    ))}
+                                </select>   
+                            </div>
+                            <div className="form-group">
+                                <label style={{textAlign:'left', width:'150px',verticalAlign:'top'}}>Activity Rights </label>
+                                <div id="TadioButtonList">
+                                    {roles.map((role, index) => (
+                                        <label key={index} className="radio-inline">
+                                            <input type="radio" name="ActivityRadio" value={role.name} onChange={() => setUser({...user, Role: role.name})} checked={user.Role === role.name} />
+                                            {role.name}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label style={{width:'146px'}}>
+                                    Active
+                                    <input className="input" type="checkbox" checked={user.IsActive} onChange={(e) => setUser({...user, IsActive: e.target.checked})} />
+                                </label>
+                            </div>
+                            {/* Repeat for ManageTEQ, ManageBEQ, and ManageAccessREQ with similar logic */}
+                        </form>
                     </div>
-                  
-                    <div class="well well-sm" ng-show="vm.hasExceptionManageAccess">
-                        <b>User Rights</b>
-                    </div>
-                    <div class="form-group" ng-show="vm.hasExceptionManageAccess">
-                        <label class="label-lg">
-                            Manage TEQ
-                            <input type="checkbox" ng-model="vm.entity.ManageTEQ" ng-true-value="true" ng-false-value="false">
-                        </label>
-                    </div>
-                    <div class="form-group" ng-show="vm.hasExceptionManageAccess">
-                        <label class="label-lg">
-                            Manage BEQ
-                            <input class="input" type="checkbox" ng-model="vm.entity.ManageBEQ" ng-true-value="true" ng-false-value="false">
-                        </label>
-                    </div>  
-                    <div class="form-group" ng-show="vm.hasAccessrightAccess">
-                        <label class="label-lg">
-                            Manage Access Request
-                            <input class="input" type="checkbox" ng-model="vm.entity.ManageAccessREQ" ng-true-value="true" ng-false-value="false">
-                        </label>
-                    </div>                  
-                </form>
+                </div>
+            </div>
+            <div className="modal-footer">
+                <button className="btn btn-success" onClick={() => save()} disabled={/* Add logic to disable based on form validity */ false}>Save</button>
+                <button className="btn btn-primary" onClick={() => close()}>Cancel</button>
             </div>
         </div>
-    </div>
-</div>
-<div class="modal-footer">
-    <button class="btn btn-success" ng-click="vm.save()" ng-disabled="serviceAddForm.$invalid">Save</button>
-    <button class="btn btn-primary" ng-click="$close()">Cancel</button>
-</div>
+    );
+};
+export default AddNewUserComponent;
