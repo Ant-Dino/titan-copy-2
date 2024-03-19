@@ -1,26 +1,30 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
+const App: React.FC = () => {
+  const [unauthorizedError, setUnauthorizedError] = React.useState<string | null>(null);
+  const [currentUser, setCurrentUser] = React.useState<string>('John Doe');
+  const [tenantName, setTenantName] = React.useState<string>('TenantName');
+  const [activityRight, setActivityRight] = React.useState<string>('Admin'); // 'Admin' or 'SuperAdmin' or another role
+  const [canManageAccessReq, setCanManageAccessReq] = React.useState<boolean>(true);
+  const errors = {
+    unauthorized: unauthorizedError,
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container-fluid">
+      <div antiforgerytoken></div>
+      {errors.unauthorized && (
+        <div className="alert alert-danger">
+          <div className="error"><i className="fa fa-lg fa-ban"> {errors.unauthorized}</i></div>
+        </div>
+      )}
+      {!errors.unauthorized && (
+        <div>
+          {/* Replacement for ps-framework and its children */}
+          {/* Add your framework and menu components here */}
+          {/* Example placeholder below */}
+          <div>Your Main Content Here</div>
+        </div>
+      )}
     </div>
   );
-}
-
+};
 export default App;
