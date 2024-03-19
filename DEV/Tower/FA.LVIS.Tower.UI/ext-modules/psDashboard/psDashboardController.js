@@ -1,0 +1,3 @@
+To proceed with your request, I'll need the specific details from the "founded controller" you mentioned, including the API calls it makes. This information is crucial for creating accurate and relevant functions in the service file. 
+
+Could you please provide the details of the API calls found in the controller, such as the endpoints, HTTP methods (GET, POST, PUT, DELETE, etc.), and any data structures or parameters that are used with these calls?
