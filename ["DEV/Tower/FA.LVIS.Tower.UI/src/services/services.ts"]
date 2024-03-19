@@ -1,0 +1,57 @@
+import axios from 'axios';
+
+const API_URL = 'http://your-api-url.com/api';
+
+const ApiService = {
+  // Fetch all items
+  getAllItems: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/items`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Fetch a single item by ID
+  getItemById: async (id) => {
+    try {
+      const response = await axios.get(`${API_URL}/items/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Create a new item
+  createItem: async (itemData) => {
+    try {
+      const response = await axios.post(`${API_URL}/items`, itemData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Update an existing item
+  updateItem: async (id, itemData) => {
+    try {
+      const response = await axios.put(`${API_URL}/items/${id}`, itemData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Delete an item
+  deleteItem: async (id) => {
+    try {
+      const response = await axios.delete(`${API_URL}/items/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+export default ApiService;
