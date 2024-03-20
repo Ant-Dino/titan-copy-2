@@ -1,60 +1,109 @@
-﻿<div antiforgerytoken></div>
-<div ng-controller="psAuditingController as vmAudit" class="ps-dashboard-header">
-    <ul class="breadcrumb">
-        <li class="subbreadcrumb">
-            <ps-sub-menu>
-                <ps-sub-menu-item label="Auditing Summary" activetab="Auditing Summary" route="auditing">Auditing Summary</ps-sub-menu-item>
-            </ps-sub-menu>
-        </li>
-    </ul>
-    <div class="wrapper">
-        <div class="col-lg-1"></div>
-        <div class="col-lg-10">
-            <ul class="ps-page-title">
-                <li>Auditing Summary</li>
-            </ul>
+import React, { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { Grid, GridColumn as Column, GridToolbar } from '@progress/kendo-react-grid';
+import { process } from '@progress/kendo-data-query';
 
-            <div growl inline="true"></div>
+type AuditingProps = {
+  getData: () => Promise<any>,
+  initialFilter?: any,
+};
+type DateFilterSection = {
+  value: string,
+  title: string,
+};
 
-            <div class="form-group">
-                <label>Start Date: </label>
-                <input  ng-disabled="vmAudit.Disabledate" ng-model="vmAudit.Fromdate" datetime-picker date-format="MM/dd/yyyy" date-only />
-                <label> End Date: </label>
-                <input  ng-disabled="vmAudit.Disabledate" name="input" ng-model="vmAudit.ThroughDate" datetime-picker date-format="MM/dd/yyyy" future-only date-only />
-                <label>Date Filter:</label>
-                <select ng-change="vmAudit.changeSelect(vmAudit.FilterSection)" ng-model="vmAudit.FilterSection" ng-options="obj.value as obj.title for obj in vmAudit.DateFilterSelection"></select>
+const AuditingSummary: React.FC<AuditingProps> = ({ getData, initialFilter }) => {
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [throughDate, setThroughDate] = useState<Date | null>(null);
+  const [busy, setBusy] = useState<boolean>(false);
+  const [validateError, setValidateError] = useState<boolean>(false);
+  const [data, setData] = useState<any[]>([]);
+  const [dateFilterSection, setDateFilterSection] = useState<DateFilterSection[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string>('');
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setBusy(true);
+      try {
+        const response = await getData();
+        setData(response);
+        // Assuming response includes date filter selection options
+        setDateFilterSection(response.dateFilterOptions || []);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setBusy(false);
+      }
+    };
+    fetchData();
+  }, [getData]);
 
-                <div style="display:inline-block;margin-left:0.5em;cursor:pointer" ng-show="!vmAudit.Busy">
-                    <i class="fa fa-search" ng-click="vmAudit.search()" ></i>
-                </div>
-                <div style="display:inline-block; margin:0 auto;" ng-show="vmAudit.Busy">
-                    <i class="fa fa-spinner fa-spin"></i>
-                </div>
-                <span class="help-block with-errors" ng-show="vmAudit.ValidateError">
-                    End date cannot be earlier than the Start date
-                </span>
-            </div>
+  const handleFromDateChange = (date: Date) => {
+    setFromDate(date);
+  };
+  const handleThroughDateChange = (date: Date) => {
+    setThroughDate(date);
+  };
+  const handleDateFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedFilter(e.target.value);
+  };
+  const search = () => {
+    // Example search function
+    setBusy(true);
+    setTimeout(() => {
+      // Simulated search operation
+      console.log('Search completed');
+      setBusy(false);
+    }, 2000);
+  };
 
-            <div id="serviceGrid" ui-grid="vmAudit.serviceGrid"
-                 ui-grid-grouping
-                 ui-grid-move-columns
-                 ui-grid-selection
-                 ui-grid-auto-resize
-                 ui-grid-cellNav
-                 ui-grid-edit
-                 ui-grid-resize-columns
-                 ui-grid-exporter
-                 ui-grid-cellnav
-                 ui-grid-custom-cell-select
-                 ui-grid-pagination class="ui-grid-selectable">
-            </div>
+  return (
+    <div className="ps-dashboard-header">
+      <ul className="breadcrumb">
+        <li className="subbreadcrumb">Auditing Summary</li>
+      </ul>
+      <div className="wrapper">
+        <div className="col-lg-1"></div>
+        <div className="col-lg-10">
+          <DatePicker
+            selected={fromDate}
+            onChange={handleFromDateChange}
+            dateFormat="MM/dd/yyyy"
+          />
+          <DatePicker
+            selected={throughDate}
+            onChange={handleThroughDateChange}
+            dateFormat="MM/dd/yyyy"
+          />
+          <select value={selectedFilter} onChange={handleDateFilterChange}>
+            {dateFilterSection.map((option) => (
+              <option key={option.value} value={option.value}>{option.title}</option>
+            ))}
+          </select>
 
+          <div style={{ display: 'inline-block', marginLeft: '0.5em', cursor: 'pointer' }} onClick={!busy ? search : undefined}>
+            <FontAwesomeIcon icon={!busy ? faSearch : faSpinner} spin={busy} />
+          </div>
+          <span className="help-block with-errors" style={{ display: validateError ? 'block' : 'none' }}>
+            End date cannot be earlier than the Start date
+          </span>
+          <Grid
+            data={process(data, initialFilter)}
+            {...initialFilter}
+          >
+            <GridToolbar>
+              Export to Excel
+            </GridToolbar>
+            {/* Define columns as needed */}
+          </Grid>
         </div>
-        <div class="col-lg-1"></div>
+        <div className="col-lg-1"></div>
+      </div>
+    </div>
+  );
+};
 
-        
-
-     </div>
-        
-</div>
+export default AuditingSummary;
