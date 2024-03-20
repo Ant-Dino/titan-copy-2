@@ -1,9 +1,0 @@
-{
-    "helpObjRepo": {
-      "Help": [ "xpath", "//div[@class='ps-noselect ng-binding'][contains(.,'Help')]" ],
-      "Basic":["xpath","//h2[contains(.,'Basic Information')]"]
-     
-    
-    
-    }
-  }
