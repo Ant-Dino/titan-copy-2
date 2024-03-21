@@ -1,0 +1,81 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+// Assuming the custom components are defined elsewhere and imported correctly
+import PSDashboard from './components/PSDashboard';
+import PSReporting from './components/PSReporting';
+import PSAuditing from './components/PSAuditing';
+import PSSecurity from './components/PSSecurity';
+import PSManageExternalRefNumber from './components/PSManageExternalRefNumber';
+import PSManageServiceRequest from './components/PSManageServiceRequest';
+import PSEndPointAccess from './components/PSEndPointAccess';
+import PSConfirmServiceRequest from './components/PSConfirmServiceRequest';
+import PSProviderMappings from './components/PSProviderMappings';
+import PSProductProviderMappings from './components/PSProductProviderMappings';
+import PSFastOfficeMappings from './components/PSFastOfficeMappings';
+import PSFastFilePreferenceMappings from './components/PSFastFilePreferenceMappings';
+import PSCustomerMappings from './components/PSCustomerMappings';
+import PSOutDocumentMappings from './components/PSOutDocumentMappings';
+import PSInDocumentMappings from './components/PSInDocumentMappings';
+import PSLocationMappings from './components/PSLocationMappings';
+import PSWebhooksMappings from './components/PSWebhooksMappings';
+import PSCategoryMappings from './components/PSCategoryMappings';
+import PSFastGABMappings from './components/PSFastGABMappings';
+import PSOutEventMappings from './components/PSOutEventMappings';
+import PSException from './components/PSException';
+import PSBusinessException from './components/PSBusinessException';
+import PSFastWebOrders from './components/PSFastWebOrders';
+import PSTerminalLogInformations from './components/PSTerminalLogInformations';
+import PSFastWorkFlowMappings from './components/PSFastWorkFlowMappings';
+import PSFastTaskMappings from './components/PSFastTaskMappings';
+import PSFastToLVISDocMappings from './components/PSFastToLVISDocMappings';
+import PSLVISToFastDocMappings from './components/PSLVISToFastDocMappings';
+import PSSubscription from './components/PSSubscription';
+import PSContactMappings from './components/PSContactMappings';
+import PSContactProviderMappings from './components/PSContactProviderMappings';
+import PSAccessRequest from './components/PSAccessRequest';
+const App = () => {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/dashboard" component={PSDashboard} />
+        <Route path="/reporting" component={PSReporting} />
+        <Route path="/auditing" component={PSAuditing} />
+        <Route path="/security" component={PSSecurity} />
+        <Route path="/manageexternalrefnumber" component={PSManageExternalRefNumber} />
+        <Route path="/manageservicerequest" component={PSManageServiceRequest} />
+        <Route path="/endpointaccess" component={PSEndPointAccess} />
+        <Route path="/confirmservicerequest" component={PSConfirmServiceRequest} />
+        <Route exact path="/providermappings" component={PSProviderMappings} />
+        <Route exact path="/providermappings/:ExternalID" component={PSProviderMappings} />
+        <Route path="/productprovidermappings/:ProviderID" component={PSProductProviderMappings} />
+        <Route path="/fastofficemappings/:ExternalID" component={PSFastOfficeMappings} />
+        <Route path="/fastfilepreferencemappings" component={PSFastFilePreferenceMappings} />
+        <Route exact path="/Customermappings" component={PSCustomerMappings} />
+        <Route path="/Customermappings/:CustomerName?" component={PSCustomerMappings} />
+        <Route path="/outdocmappings/:LenderName/:isGroups" component={PSOutDocumentMappings} />
+        <Route path="/indocmappings" component={PSInDocumentMappings} />
+        <Route path="/Locationmappings/:CustomerName" component={PSLocationMappings} />
+        <Route path="/webhooksMappings/:CustomerName" component={PSWebhooksMappings} />
+        <Route path="/Categorymappings" component={PSCategoryMappings} />
+        <Route path="/fastgabmappings/:LocationName" component={PSFastGABMappings} />
+        <Route path="/outeventmappings/:LenderName" component={PSOutEventMappings} />
+        <Route exact path="/Exceptions" component={PSException} />
+        <Route path="/Exceptions/:ExceptionType?" component={PSException} />
+        <Route exact path="/businessexception" component={PSBusinessException} />
+        <Route path="/businessexception/:ExceptionType?" component={PSBusinessException} />
+        <Route path="/fastweborders" component={PSFastWebOrders} />
+        <Route path="/terminalloginformation" component={PSTerminalLogInformations} />
+        <Route path="/FastWorkFlowMappings" component={PSFastWorkFlowMappings} />
+        <Route path="/FastTaskMappings" component={PSFastTaskMappings} />
+        <Route path="/FastToLVISDocMappings" component={PSFastToLVISDocMappings} />
+        <Route path="/LVISToFastDocMappings" component={PSLVISToFastDocMappings} />
+        <Route path="/subscription/:CustomerName/:isCategory" component={PSSubscription} />
+        <Route path="/Contactmappings/:LocationName" component={PSContactMappings} />
+        <Route path="/ContactProvidermappings/:CustomerId" component={PSContactProviderMappings} />
+        <Route exact path="/AccessRequest" component={PSAccessRequest} />
+        <Route path="/AccessRequest/:emailid" component={PSAccessRequest} />
+      </Switch>
+    </Router>
+  );
+};
+export default App;
