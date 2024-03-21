@@ -1,26 +1,40 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-function App() {
+// Components Import Statements Here
+
+const App = () => {
+  // useState and useEffect hooks as necessary
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="container-fluid">
+        <div className="alert alert-danger" style={{ display: 'none' }}>
+          <div className="error">
+            <i className="fa fa-lg fa-ban"></i> {/* errors.unauthorized */}
+          </div>
+        </div>
+        <div>
+          {/* Assuming ps-framework is the parent component for routes */}
+          <div> {/* ps-framework related JSX */}
+            <nav>
+              {/* ps-menu related JSX */}
+              {/* Routes will go here */}
+              <Switch>
+                <Route path="/dashboard" component={PsDashboard} />
+                <Route path="/reporting" component={PsReporting} />
+                <Route path="/auditing" component={PsAuditing} />
+                <Route path="/security" component={PsSecurity} />
+                <Route path="/manageexternalrefnumber" component={PsManageExternalRefNumber} />
+                <Route path="/manageservicerequest" component={PsManageServiceRequest} />
+                ...{/* Other routes based on the configuration */}
+              </Switch>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
