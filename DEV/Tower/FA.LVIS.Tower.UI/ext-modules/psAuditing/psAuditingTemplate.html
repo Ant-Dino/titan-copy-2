@@ -1,60 +1,70 @@
-﻿<div antiforgerytoken></div>
-<div ng-controller="psAuditingController as vmAudit" class="ps-dashboard-header">
-    <ul class="breadcrumb">
-        <li class="subbreadcrumb">
-            <ps-sub-menu>
-                <ps-sub-menu-item label="Auditing Summary" activetab="Auditing Summary" route="auditing">Auditing Summary</ps-sub-menu-item>
-            </ps-sub-menu>
+import React, { useState } from 'react';
+type AuditingSummaryProps = {
+  fromdate: string,
+  throughDate: string,
+  disableDate: boolean,
+  filterSection: any,
+  dateFilterSelection: Array<{value: any, title: string}>,
+  busy: boolean,
+  validateError: boolean,
+  search: () => void,
+  changeSelect: (value: any) => void,
+const AuditingSummary = ({
+  fromdate, 
+  throughDate, 
+  disableDate, 
+  filterSection, 
+  dateFilterSelection, 
+  busy, 
+  validateError, 
+  search, 
+  changeSelect,
+  const [startDate, setStartDate] = useState(fromdate);
+  const [endDate, setEndDate] = useState(throughDate);
+  return (
+    <div className="ps-dashboard-header">
+      <ul className="breadcrumb">
+        <li className="subbreadcrumb">
+           {/* React equivalent of ps-sub-menu and ps-sub-menu-item, possibly a React component */}
         </li>
-    </ul>
-    <div class="wrapper">
-        <div class="col-lg-1"></div>
-        <div class="col-lg-10">
-            <ul class="ps-page-title">
-                <li>Auditing Summary</li>
-            </ul>
+      </ul>
+      <div className="wrapper">
+        <div className="col-lg-1"></div>
+        <div className="col-lg-10">
+          <ul className="ps-page-title">
+            <li>Auditing Summary</li>
+          </ul>
+          
+          {/* Growl equivalent in React TBD */}
+          
+          <div className="form-group">
+            <label>Start Date: </label>
+            <input disabled={disableDate} value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" />
+            <label> End Date: </label>
+            <input disabled={disableDate} name="input" value={endDate} onChange={(e) => setEndDate(e.target.value)} type="date" />
+            <label>Date Filter:</label>
+            <select value={filterSection} onChange={(e) => changeSelect(e.target.value)}>
+              {dateFilterSelection.map(option => (
+                <option key={option.value} value={option.value}>{option.title}</option>
+              ))}
+            </select>
 
-            <div growl inline="true"></div>
-
-            <div class="form-group">
-                <label>Start Date: </label>
-                <input  ng-disabled="vmAudit.Disabledate" ng-model="vmAudit.Fromdate" datetime-picker date-format="MM/dd/yyyy" date-only />
-                <label> End Date: </label>
-                <input  ng-disabled="vmAudit.Disabledate" name="input" ng-model="vmAudit.ThroughDate" datetime-picker date-format="MM/dd/yyyy" future-only date-only />
-                <label>Date Filter:</label>
-                <select ng-change="vmAudit.changeSelect(vmAudit.FilterSection)" ng-model="vmAudit.FilterSection" ng-options="obj.value as obj.title for obj in vmAudit.DateFilterSelection"></select>
-
-
-                <div style="display:inline-block;margin-left:0.5em;cursor:pointer" ng-show="!vmAudit.Busy">
-                    <i class="fa fa-search" ng-click="vmAudit.search()" ></i>
-                </div>
-                <div style="display:inline-block; margin:0 auto;" ng-show="vmAudit.Busy">
-                    <i class="fa fa-spinner fa-spin"></i>
-                </div>
-                <span class="help-block with-errors" ng-show="vmAudit.ValidateError">
-                    End date cannot be earlier than the Start date
-                </span>
+            <div style={{display: 'inline-block', marginLeft: '0.5em', cursor: 'pointer'}} onClick={!busy ? search : undefined}>
+              {busy ? <i className="fa fa-spinner fa-spin"></i> : <i className="fa fa-search"></i>}
             </div>
-
-            <div id="serviceGrid" ui-grid="vmAudit.serviceGrid"
-                 ui-grid-grouping
-                 ui-grid-move-columns
-                 ui-grid-selection
-                 ui-grid-auto-resize
-                 ui-grid-cellNav
-                 ui-grid-edit
-                 ui-grid-resize-columns
-                 ui-grid-exporter
-                 ui-grid-cellnav
-                 ui-grid-custom-cell-select
-                 ui-grid-pagination class="ui-grid-selectable">
-            </div>
-
+            {validateError && 
+              <span className="help-block with-errors">
+                End date cannot be earlier than the Start date
+              </span>
+            }
+          </div>
+          
+          {/* Grid equivalent in React TBD */}
+          
         </div>
-        <div class="col-lg-1"></div>
-
-        
-
-     </div>
-        
-</div>
+        <div className="col-lg-1"></div>
+      </div>        
+    </div>
+  );
+};
+export default AuditingSummary;
