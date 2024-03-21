@@ -1,79 +1,101 @@
-﻿<div antiforgerytoken></div>
-<div ng-controller="psReportingController as vmReport" class="ps-dashboard-header">
-    <ul class="breadcrumb">
-        <li class="subbreadcrumb">
-            <ps-sub-menu>
-                <div ng-if="loggedTenant == 'LVIS'">
-                    <ps-sub-menu-item ng-if="togglingTenant == 'LVIS'" label="Orders Summary" activetab="Orders Summary" ng-click="vmReport.switchGridInfo('')">Orders Summary</ps-sub-menu-item>
-                    <ps-sub-menu-item ng-if="togglingTenant == 'RF'" label="Orders Summary" ng-click="vmReport.switchGridInfo('')">Orders Summary</ps-sub-menu-item>
-                    <ps-sub-menu-item ng-if="togglingTenant == 'LVIS'" label="RF Orders Summary" ng-click="vmReport.switchGridInfo('RF')">RF Orders Summary</ps-sub-menu-item>
-                    <ps-sub-menu-item ng-if="togglingTenant == 'RF'" label="RF Orders Summary" activetab="RF Orders Summary" ng-click="vmReport.switchGridInfo('RF')">RF Orders Summary</ps-sub-menu-item>                
-                </div>
-                <div ng-if="loggedTenant != 'LVIS'">
-                    <ps-sub-menu-item label="Orders Summary" activetab="Orders Summary" ng-click="vmReport.search()">Orders Summary</ps-sub-menu-item>
-                </div>
-                
-            </ps-sub-menu>
-        </li>
-    </ul>
-    <div class="wrapper">
-        <div class="col-lg-1"></div>
-        <div class="col-lg-10">
-            <ul class="ps-page-title">
-                <li>{{title}}</li>
+import React, { useState, useEffect } from 'react';
+interface Props {
+  title: string;
+  loggedTenant: string;
+  togglingTenant: string;
+  showDates: boolean;
+  showRefNum: boolean;
+  DisableDate: boolean;
+  Fromdate: string;
+  ThroughDate: string;
+  DisableReferenceNo: boolean;
+  ReferenceNo: string;
+  search: () => void;
+  searchbyReferenceNo: () => void;
+  switchGridInfo: (info: string) => void;
+  loadRFOrder: () => void;
+  invalidateConfirm: () => void;
+  hasAccess: boolean;
+  inValidBtnEnable: boolean;
+  ValidateError: boolean;
+  Busy: boolean;
+  BusyRef: boolean;
+  DateFilterSelection: Array<{value: string, title: string}>;
+  FilterSection: string;
+  changeSelect: (value: string) => void;
+  ReferencenoFilterSelection: Array<{value: string, title: string}>;
+  FilterReferenceNoSection: string;
+  changerefSelect: (value: string) => void;
+}
+const ReportingComponent: React.FC<Props> = ({ title, loggedTenant, togglingTenant, showDates, showRefNum, DisableDate, Fromdate, ThroughDate, DisableReferenceNo, ReferenceNo, search, searchbyReferenceNo, switchGridInfo, loadRFOrder, invalidateConfirm, hasAccess, inValidBtnEnable, ValidateError, Busy, BusyRef, DateFilterSelection, FilterSection, changeSelect, ReferencenoFilterSelection, FilterReferenceNoSection, changerefSelect }) => {
+  return (
+    <div>
+      <div className="ps-dashboard-header">
+        <ul className="breadcrumb">
+          <li className="subbreadcrumb">
+            {loggedTenant === 'LVIS' ? (
+              <div>
+                {togglingTenant === 'LVIS' && <div onClick={() => switchGridInfo('')}>Orders Summary</div>}
+                {togglingTenant === 'RF' && <div onClick={() => switchGridInfo('')}>Orders Summary</div>}
+                {togglingTenant === 'LVIS' && <div onClick={() => switchGridInfo('RF')}>RF Orders Summary</div>}
+                {togglingTenant === 'RF' && <div onClick={() => switchGridInfo('RF')}>RF Orders Summary</div>}
+              </div>
+            ) : (
+              <div onClick={search}>Orders Summary</div>
+            )}
+          </li>
+        </ul>
+        <div className="wrapper">
+          <div className="col-lg-1"></div>
+          <div className="col-lg-10">
+            <ul className="ps-page-title">
+              <li>{title}</li>
             </ul>
-            <div growl inline="true"></div>
-            <div class="form-group">
-                <div class="form-group" style="display:inline-block">
-                    <i onMouseOver="this.style.cursor='pointer'" id="dt" ng-style="mydtStyle" class="fa fa-calendar" title="Search By Date Range" ng-click="ShowHide('showdates')"></i>|<i onMouseOver="this.style.cursor='pointer'" ng-style="mynumStyle" class="fa fa-bars" title="Search By Reference Number" ng-click="ShowHide('showrefnum')"></i>
-                </div>
-                <div ng-show="vmReport.showdates" class="form-group" name="OrderActivityForm" style="display:inline-block">
-                    <label>Start Date: </label>
-                    <input ng-disabled="vmReport.Disabledate" ng-model="vmReport.Fromdate" datetime-picker date-format="MM/dd/yyyy" date-only />
-                    <label> End Date: </label>
-                    <input ng-disabled="vmReport.Disabledate" name="input" ng-model="vmReport.ThroughDate" datetime-picker date-format="MM/dd/yyyy" future-only date-only />
-                    <label>Date Filter:</label>
-                    <select ng-change="vmReport.changeSelect(vmReport.FilterSection)" ng-model="vmReport.FilterSection" ng-options="obj.value as obj.title for obj in vmReport.DateFilterSelection"></select>
+            <div className="form-group">
+              <div className="form-group" style={{ display: "inline-block" }}>
+                <i onMouseOver={(e) => (e.currentTarget.style.cursor = 'pointer')} onClick={() => showDates ? search() : null} className="fa fa-calendar" title="Search By Date Range"></i>
+                |
+                <i onMouseOver={(e) => (e.currentTarget.style.cursor = 'pointer')} onClick={() => showRefNum ? searchbyReferenceNo() : null} className="fa fa-bars" title="Search By Reference Number"></i>
+              </div>
+              {showDates && <div className="form-group" style={{ display: "inline-block" }}>
+                <label>Start Date: </label>
+                <input disabled={DisableDate} value={Fromdate} type="date" />
+                <label> End Date: </label>
+                <input disabled={DisableDate} value={ThroughDate} type="date" />
+                <label>Date Filter:</label>
+                <select value={FilterSection} onChange={(e) => changeSelect(e.target.value)}>
+                  {DateFilterSelection.map((obj, index) => (
+                    <option key={index} value={obj.value}>{obj.title}</option>
+                  ))}
+                </select>
 
-                    <div style="display:inline-block;margin-left:0.5em;cursor:pointer" ng-show="!vmReport.Busy">
-                        <i class="fa fa-search" ng-click="(togglingTenant == 'RF') ? vmReport.loadRFOrder() : vmReport.search()"></i>
-                    </div>
-                    <div style="display:inline-block; margin:0 auto;" ng-show="vmReport.Busy">
-                        <i class="fa fa-spinner fa-spin"></i>
-                    </div>
-                    <span class="help-block with-errors" ng-show="vmReport.ValidateError">
-                        End date cannot be earlier than the Start date
-                    </span>
+                <div style={{ display: "inline-block", marginLeft: "0.5em", cursor: "pointer" }} onClick={togglingTenant === 'RF' ? loadRFOrder : search}>
+                  {!Busy && <i className="fa fa-search"></i>}
+                  {Busy && <i className="fa fa-spinner fa-spin"></i>}
                 </div>
-                <div ng-show="vmReport.showrefnum" class="form-group" style="display:inline-block">
-                    <label>Search By</label>
-                    <select ng-change="vmReport.changerefSelect(vmReport.FilterReferenceNoSection)" ng-model="vmReport.FilterReferenceNoSection" ng-options="obj.value as obj.title for obj in vmReport.ReferencenoFilterSelection"></select>
-                    <input class="input" ng-disabled="vmReport.DisableReferenceNo" type="text" required ng-model="vmReport.ReferenceNo" />
-                    <div style="display:inline-block;margin-left:0.5em;cursor:pointer" ng-show="!vmReport.BusyRef">
-                        <i class="fa fa-search" ng-click="vmReport.searchbyReferenceNo()"></i>
-                    </div>
-                    <div style="display:inline-block; margin:0 auto;" ng-show="vmReport.BusyRef">
-                        <i class="fa fa-spinner fa-spin"></i>
-                    </div>
+                {ValidateError && <span className="help-block with-errors">End date cannot be earlier than the Start date</span>}
+              </div>}
+              {showRefNum && <div className="form-group" style={{ display: "inline-block" }}>
+                <label>Search By</label>
+                <select value={FilterReferenceNoSection} onChange={(e) => changerefSelect(e.target.value)}>
+                  {ReferencenoFilterSelection.map((obj, index) => (
+                    <option key={index} value={obj.value}>{obj.title}</option>
+                  ))}
+                </select>
+                <input className="input" disabled={DisableReferenceNo} type="text" value={ReferenceNo} />
+                <div style={{ display: "inline-block", marginLeft: "0.5em", cursor: "pointer" }} onClick={searchbyReferenceNo}>
+                  {!BusyRef && <i className="fa fa-search"></i>}
+                  {BusyRef && <i className="fa fa-spinner fa-spin"></i>}
                 </div>
-                <div style="display:inline-block;float:right; margin:0 auto;cursor:pointer">
-                    <button class="btn btn-sm" ng-show="hasAccess" ng-click="vmReport.inValidateConfirm()" ng-disabled="inValidBtnEnable">Invalidate Order</button>
-                </div>
+              </div>}
+              {hasAccess && <button className="btn btn-sm" onClick={invalidateConfirm} disabled={inValidBtnEnable}>Invalidate Order</button>}
             </div>
-            <div id="serviceGrid" ui-grid="vmReport.serviceGrid"
-                 ui-grid-grouping
-                 ui-grid-move-columns
-                 ui-grid-selection
-                 ui-grid-auto-resize
-                 ui-grid-edit
-                 ui-grid-pagination
-                 ui-grid-exporter
-                 ui-grid-resize-columns
-                 ui-grid-pinning
-                 ui-grid-cellnav
-                 ui-grid-expandable class="ui-grid-selectable">
-            </div>
+          </div>
+          <div className="col-lg-1"></div>
         </div>
-        <div class="col-lg-1"></div>
+      </div>
     </div>
-</div>
+  );
+};
+
+export default ReportingComponent;
