@@ -1,0 +1,20 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+
+const App = () => {
+  return (
+    <div>
+      <Router>
+        <Switch>
+          {/* Assuming we wanted routes, they would be set up here. Given the empty configuration, we'll render a default message. */}
+          <Route path="/">
+            Hello, React Router with TypeScript!
+          </Route>
+        </Switch>
+      </Router>
+    </div>
+  );
+};
+
+ReactDOM.render(<App />, document.getElementById('root'));
