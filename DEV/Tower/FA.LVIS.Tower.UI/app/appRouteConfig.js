@@ -1,269 +1,82 @@
-﻿"use strict";
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-angular.module('app').config(['$routeProvider','$httpProvider',
-    function ($routeProvider, $httpProvider) {
-        var routes = [
-            {
-                url: '/dashboard',
-                config: {
-                    template: '<ps-dashboard></ps-dashboard>'
-                },
-                activetab: 'dashboard'
-            },
-            {
-                url: '/reporting',
-                config: {
-                    template: '<ps-reporting></ps-reporting>'
-                },
-                activetab: 'reporting'
-            },
-            {
-                url: '/auditing',
-                config: {
-                    template: '<ps-Auditing></ps-Auditing>'
-                },
-                activetab: 'auditing'
-            },
-            {
-                url: '/security',
-                config: {
-                    template: '<ps-security></ps-security>'
-                },
-                activetab: 'security'
-            },
-            {
-                url: '/manageexternalrefnumber',
-                config: {
-                    template: '<ps-Manage-External-Ref-Number></ps-Manage-External-Ref-Number>'
-                },
-                activetab: 'manageexternalrefnumber'
-            },
-             {
-                 url: '/manageservicerequest',
-                 config: {
-                     template: '<ps-Manage-Service-Request></ps-Manage-Service-Request>'
-                 },
-                 activetab: 'manageservicerequest'
-            },
-            {
-                url: '/endpointaccess',
-                config: {
-                    template: '<ps-EndPoint-Access></ps-EndPoint-Access>'
-                },
-                activetab: 'endpointaccess'
-            },
-              {
-                  url: '/confirmservicerequest',
-                  config: {
-                      template: '<ps-Confirm-Service-Request></ps-Confirm-Service-Request>'
-                  },
-                  activetab: 'confirmservicerequest'
-              },
+// Components Import (Assuming these are already converted to React components)
+// Note: The names used here need to match with your actual component names.
+import PsDashboard from './components/PsDashboard';
+import PsReporting from './components/PsReporting';
+import PsAuditing from './components/PsAuditing';
+import PsSecurity from './components/PsSecurity';
+import PsManageExternalRefNumber from './components/PsManageExternalRefNumber';
+import PsManageServiceRequest from './components/PsManageServiceRequest';
+import PsEndPointAccess from './components/PsEndPointAccess';
+import PsConfirmServiceRequest from './components/PsConfirmServiceRequest';
+import PsProviderMappings from './components/PsProviderMappings';
+import PsProductProviderMappings from './components/PsProductProviderMappings';
+import PsFastOfficeMappings from './components/PsFastOfficeMappings';
+import PsFastFilePreferenceMappings from './components/PsFastFilePreferenceMappings';
+import PsCustomerMappings from './components/PsCustomerMappings';
+import PsOutDocumentMappings from './components/PsOutDocumentMappings';
+import PsInDocumentMappings from './components/PsInDocumentMappings';
+import PsLocationMappings from './components/PsLocationMappings';
+import PsWebhooksMappings from './components/PsWebhooksMappings';
+import PsCategoryMappings from './components/PsCategoryMappings';
+import PsFastGabMappings from './components/PsFastGabMappings';
+import PsOutEventMappings from './components/PsOutEventMappings';
+import PsException from './components/PsException';
+import PsBusinessException from './components/PsBusinessException';
+import PsFastWebOrders from './components/PsFastWebOrders';
+import PsTerminalLogInformations from './components/PsTerminalLogInformations';
+import PsFastWorkFlowMappings from './components/PsFastWorkFlowMappings';
+import PsFastTaskMappings from './components/PsFastTaskMappings';
+import PsFasttoLvisDocumentMappings from './components/PsFasttoLvisDocumentMappings';
+import PsLvisToFastDocumentMappings from './components/PsLvisToFastDocumentMappings';
+import PsSubscription from './components/PsSubscription';
+import PsContactMappings from './components/PsContactMappings';
+import PsContactProviderMappings from './components/PsContactProviderMappings';
+import PsAccessRequest from './components/PsAccessRequest';
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Switch>
+        <Route exact path="/dashboard" component={PsDashboard} />
+        <Route path="/reporting" component={PsReporting} />
+        <Route path="/auditing" component={PsAuditing} />
+        <Route path="/security" component={PsSecurity} />
+        <Route path="/manageexternalrefnumber" component={PsManageExternalRefNumber} />
+        <Route path="/manageservicerequest" component={PsManageServiceRequest} />
+        <Route path="/endpointaccess" component={PsEndPointAccess} />
+        <Route path="/confirmservicerequest" component={PsConfirmServiceRequest} />
+        {/* Including Routes with Params */}
+        <Route path="/providermappings/:ExternalID?" component={PsProviderMappings} />
+        <Route path="/productprovidermappings/:ProviderID" component={PsProductProviderMappings} />
+        <Route path="/fastofficemappings/:ExternalID" component={PsFastOfficeMappings} />
+        <Route path="/fastfilepreferencemappings" component={PsFastFilePreferenceMappings} />
+        <Route path="/Customermappings/:CustomerName?" component={PsCustomerMappings} />
+        <Route path="/outdocmappings/:LenderName/:isGroups" component={PsOutDocumentMappings} />
+        <Route path="/indocmappings" component={PsInDocumentMappings} />
+        <Route path="/Locationmappings/:CustomerName" component={PsLocationMappings} />
+        <Route path="/webhooksMappings/:CustomerName" component={PsWebhooksMappings} />
+        <Route path="/Categorymappings" component={PsCategoryMappings} />
+        <Route path="/fastgabmappings/:LocationName" component={PsFastGabMappings} />
+        <Route path="/outeventmappings/:LenderName" component={PsOutEventMappings} />
+        <Route path="/Exceptions/:ExceptionType?" component={PsException} />
+        <Route path="/businessexception/:ExceptionType?" component={PsBusinessException} />
+        <Route path="/fastweborders" component={PsFastWebOrders} />
+        <Route path="/terminalloginformation" component={PsTerminalLogInformations} />
+        <Route path="/FastWorkFlowMappings" component={PsFastWorkFlowMappings} />
+        <Route path="/FastTaskMappings" component={PsFastTaskMappings} />
+        <Route path="/FastToLVISDocMappings" component={PsFasttoLvisDocumentMappings} />
+        <Route path="/LVISToFastDocMappings" component={PsLvisToFastDocumentMappings} />
+        <Route path="/subscription/:CustomerName/:isCategory" component={PsSubscription} />
+        <Route path="/Contactmappings/:LocationName" component={PsContactMappings} />
+        <Route path="/ContactProvidermappings/:CustomerId" component={PsContactProviderMappings} />
+        <Route path="/AccessRequest/:emailid?" component={PsAccessRequest} />
+        {/* Redirect to /dashboard when no other route matches */}
+        <Route component={PsDashboard} />
+      </Switch>
+    </Router>
+  );
+};
 
-            {
-                url: '/providermappings',
-                config: {
-                    template: '<ps-provider-mappings></ps-provider-mappings>'
-                },
-                activetab: 'providermappings'
-            },
-            {
-                url: '/providermappings/:ExternalID',
-                config: {
-                    template: '<ps-provider-mappings></ps-provider-mappings>'
-                },
-                activetab: 'providermappings'
-            },
-            {
-                url: '/productprovidermappings/:ProviderID',
-                config: {
-                    template: '<ps-product-provider-mappings></ps-product-provider-mappings>'
-                },
-                activetab: 'productprovidermappings'
-            },
-            {
-                url: '/fastofficemappings/:ExternalID',
-                config: {
-                    template: '<ps-fast-office-mappings></ps-fast-office-mappings>'
-                },
-                activetab: 'fastofficemappings'
-            },
-            {
-                url: '/fastfilepreferencemappings',
-                config: {
-                    template: '<ps-fast-file-Preference-mappings></ps-fast-file-Preference-mappings>'
-                },
-                activetab: 'fastfilepreferencemappings'
-            },
-            {
-                url: '/Customermappings/:CustomerName?',
-                config: {
-                    template: '<ps-Customer-mappings></ps-Customer-mappings>'
-                },
-                activetab: 'Customermappings'
-            },
-            {
-                url: '/outdocmappings/:LenderName/:isGroups',
-                config: {
-                    template: '<ps-out-document-mappings></ps-out-document-mappings>'
-                },
-                activetab: 'outdocmappings'
-            },
-             {
-                 url: '/indocmappings',
-                 config: {
-                     template: '<ps-in-document-mappings></ps-in-document-mappings>'
-                 },
-                 activetab: 'indocmappings'
-             },
-             {
-                 url: '/Locationmappings/:CustomerName',
-                 config: {
-                     template: '<ps-Location-mappings></ps-Location-mappings>'
-                 },
-                 activetab: 'Locationmappings'
-             },
-             {
-                 url: '/webhooksMappings/:CustomerName',
-                 config: {
-                     template: '<ps-Webhooks-Mappings></ps-Webhooks-Mappings>'
-                 },
-                 activetab: 'webhooksMappings'
-             },
-              {
-                  url: '/Categorymappings',
-                  config: {
-                      template: '<ps-Category-mappings></ps-Category-mappings>'
-                  },
-                  activetab: 'Categorymappings'
-              },
-               {
-                   url: '/fastgabmappings/:LocationName',
-                   config: {
-                       template: '<psfastgabmappings></psfastgabmappings>'
-                   },
-                   activetab: 'fastgabmappings'
-               },
-                {
-                    url: '/outeventmappings/:LenderName',
-                    config: {
-                        template: '<ps-out-event-mappings></ps-out-event-mappings>'
-                    },
-                    activetab: 'outeventmappings'
-                },
-                {
-                    url: '/Exceptions/:ExceptionType?',
-                    config: {
-                        template: '<ps-Exception></ps-Exception>'
-                    },
-                    activetab: 'Exceptions'
-                },
-                {
-                    url: '/businessexception/:ExceptionType?',
-                    config: {
-                        template: '<ps-business-exception></ps-business-exception>'
-                    },
-                    activetab: 'BusinessExceptions'
-                },
-                {
-                    url: '/fastweborders',
-                    config: {
-                        template: '<ps-fast-web-orders></ps-fast-web-orders>'
-                    },
-                    activetab: 'FastWebOrders'
-                },
-                {
-                    url: '/businessexception',
-                    config: {
-                        template: '<ps-business-exception></ps-business-exception>'
-                    },
-                    activetab: 'BusinessExceptions'
-                },
-                {
-                    url: '/terminalloginformation',
-                    config: {
-                        template: '<ps-Terminal-Log-Informations></ps-Terminal-Log-Informations>'
-                    },
-                    activetab: 'Terminalloginformation'
-                },
-                {
-                    url: '/FastWorkFlowMappings',
-                    config: {
-                        template: '<ps-Fast-Work-Flow-Mappings></ps-Fast-Work-Flow-Mappings>',
-                    },
-                    activetab: 'FastWorkFlowMappings'
-                },
-                {
-                    url: '/FastTaskMappings',
-                    config: {
-                        template: '<ps-Fast-Task-Mappings></ps-Fast-Task-Mappings>',
-                    },
-                    activetab: 'FastTaskMappings'
-                },
-                {
-                    url: '/FastToLVISDocMappings',
-                    config: {
-                        template: '<ps-Fastto-Lvis-Document-Mappings></ps-Fastto-Lvis-Document-Mappings>',
-                    },
-                    activetab: 'FastToLVISDocMappings'
-                },
-                {
-                    url: '/LVISToFastDocMappings',
-                    config: {
-                        template: '<ps-Lvis-To-Fast-Document-Mappings></<ps-Lvis-To-Fast-Document-Mappings>',
-                    },
-                    activetab: 'LVISToFastDocMappings'
-                },
-                {
-                    url: '/subscription/:CustomerName/:isCategory',
-                    config: {
-                        template: '<ps-Subscription></ps-Subscription>'
-                    },
-                    activetab: 'Subscription'
-                },
-             {
-                 url: '/Contactmappings/:LocationName',
-                 config: {
-                     template: '<ps-Contact-mappings></ps-Contact-mappings>'
-                 },
-                 activetab: 'Contactmappings'
-             },
-             {
-                 url: '/ContactProvidermappings/:CustomerId',
-                 config: {
-                     template: '<ps-Contact-Provider-mappings></ps-Contact-Provider-mappings>'
-                 },
-                 activetab: 'ContactProvidermappings'
-             }
-             , {
-                 url: '/AccessRequest',
-                 config: {
-                     template: '<ps-Access-Request></ps-Access-Request>'
-                 },
-                 activetab: 'AccessRequest'
-             }
-             , {
-                 url: '/AccessRequest/:emailid',
-                 config: {
-                     template: '<ps-Access-Request></ps-Access-Request>'
-                 },
-                 activetab: 'AccessRequest'
-             }
-
-        ];
-
-        routes.forEach(function (route) {
-            $routeProvider.when(route.url, route.config, route.activetab);
-
-        });
-
-        $routeProvider.otherwise({ redirectTo: '/dashboard' });
-
-        $httpProvider.interceptors.push('antiForgeryInterceptor');
-
-    }]).constant('apiUrl', '');
-
-function navCtrl($scope, $route) {
-    //we set $route to  we have access to it in the HTML
-    $scope.$route = $route;
-}
+export default App;
