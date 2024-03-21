@@ -1,79 +1,117 @@
-﻿<div antiforgerytoken></div>
-<div ng-controller="psReportingController as vmReport" class="ps-dashboard-header">
-    <ul class="breadcrumb">
-        <li class="subbreadcrumb">
-            <ps-sub-menu>
-                <div ng-if="loggedTenant == 'LVIS'">
-                    <ps-sub-menu-item ng-if="togglingTenant == 'LVIS'" label="Orders Summary" activetab="Orders Summary" ng-click="vmReport.switchGridInfo('')">Orders Summary</ps-sub-menu-item>
-                    <ps-sub-menu-item ng-if="togglingTenant == 'RF'" label="Orders Summary" ng-click="vmReport.switchGridInfo('')">Orders Summary</ps-sub-menu-item>
-                    <ps-sub-menu-item ng-if="togglingTenant == 'LVIS'" label="RF Orders Summary" ng-click="vmReport.switchGridInfo('RF')">RF Orders Summary</ps-sub-menu-item>
-                    <ps-sub-menu-item ng-if="togglingTenant == 'RF'" label="RF Orders Summary" activetab="RF Orders Summary" ng-click="vmReport.switchGridInfo('RF')">RF Orders Summary</ps-sub-menu-item>                
-                </div>
-                <div ng-if="loggedTenant != 'LVIS'">
-                    <ps-sub-menu-item label="Orders Summary" activetab="Orders Summary" ng-click="vmReport.search()">Orders Summary</ps-sub-menu-item>
-                </div>
-                
-            </ps-sub-menu>
-        </li>
-    </ul>
-    <div class="wrapper">
-        <div class="col-lg-1"></div>
-        <div class="col-lg-10">
-            <ul class="ps-page-title">
-                <li>{{title}}</li>
+import React, { useState } from 'react';
+interface PsReportingProps {
+    loggedTenant: string;
+    togglingTenant: string;
+    title: string;
+    switchGridInfo: (info: string) => void;
+    hasAccess: boolean;
+    inValidateConfirm: () => void;
+    search: () => void;
+    loadRFOrder: () => void;
+    searchbyReferenceNo: () => void;
+}
+const PsReporting: React.FC<PsReportingProps> = ({ loggedTenant, togglingTenant, title, switchGridInfo, hasAccess, inValidateConfirm, search, loadRFOrder, searchbyReferenceNo }) => {
+    const [showdates, setShowdates] = useState<boolean>(false);
+    const [showrefnum, setShowrefnum] = useState<boolean>(false);
+    const [Fromdate, setFromdate] = useState<string>('');
+    const [ThroughDate, setThroughDate] = useState<string>('');
+    const [FilterSection, setFilterSection] = useState<string>('');
+    const [FilterReferenceNoSection, setFilterReferenceNoSection] = useState<string>('');
+    const [ReferenceNo, setReferenceNo] = useState<string>('');
+    const [ValidateError, setValidateError] = useState<boolean>(false);
+    const [Busy, setBusy] = useState<boolean>(false);
+    const [BusyRef, setBusyRef] = useState<boolean>(false);
+    const handleShowHide = (field: string) => {
+        if (field === 'showdates') {
+            setShowdates(!showdates);
+        } else if (field === 'showrefnum') {
+            setShowrefnum(!showrefnum);
+        }
+    };
+    return (
+        <div>
+            <ul className="breadcrumb">
+                <li className="subbreadcrumb">
+                    {loggedTenant === 'LVIS' && (
+                        <>
+                            {togglingTenant === 'LVIS' && (
+                                <div onClick={() => switchGridInfo('')}>Orders Summary</div>
+                            )}
+                            {togglingTenant === 'RF' && (
+                                <div onClick={() => switchGridInfo('')}>Orders Summary</div>
+                            )}
+                            {togglingTenant === 'LVIS' && (
+                                <div onClick={() => switchGridInfo('RF')}>RF Orders Summary</div>
+                            )}
+                            {togglingTenant === 'RF' && (
+                                <div onClick={() => switchGridInfo('RF')}>RF Orders Summary</div>
+                            )}
+                        </>
+                    )}
+                    {loggedTenant !== 'LVIS' && (
+                        <div onClick={search}>Orders Summary</div>
+                    )}
+                </li>
             </ul>
-            <div growl inline="true"></div>
-            <div class="form-group">
-                <div class="form-group" style="display:inline-block">
-                    <i onMouseOver="this.style.cursor='pointer'" id="dt" ng-style="mydtStyle" class="fa fa-calendar" title="Search By Date Range" ng-click="ShowHide('showdates')"></i>|<i onMouseOver="this.style.cursor='pointer'" ng-style="mynumStyle" class="fa fa-bars" title="Search By Reference Number" ng-click="ShowHide('showrefnum')"></i>
-                </div>
-                <div ng-show="vmReport.showdates" class="form-group" name="OrderActivityForm" style="display:inline-block">
-                    <label>Start Date: </label>
-                    <input ng-disabled="vmReport.Disabledate" ng-model="vmReport.Fromdate" datetime-picker date-format="MM/dd/yyyy" date-only />
-                    <label> End Date: </label>
-                    <input ng-disabled="vmReport.Disabledate" name="input" ng-model="vmReport.ThroughDate" datetime-picker date-format="MM/dd/yyyy" future-only date-only />
-                    <label>Date Filter:</label>
-                    <select ng-change="vmReport.changeSelect(vmReport.FilterSection)" ng-model="vmReport.FilterSection" ng-options="obj.value as obj.title for obj in vmReport.DateFilterSelection"></select>
+            <div className="wrapper">
+                <div className="col-lg-1"></div>
+                <div className="col-lg-10">
+                    <ul className="ps-page-title">
+                        <li>{title}</li>
+                    </ul>
+                    <div className="form-group">
+                        <div className="form-group" style={{ display: 'inline-block' }}>
+                            <i onMouseOver={(e) => (e.currentTarget.style.cursor = 'pointer')} id="dt" className="fa fa-calendar" title="Search By Date Range" onClick={() => handleShowHide('showdates')}></i>|<i onMouseOver={(e) => (e.currentTarget.style.cursor = 'pointer')} className="fa fa-bars" title="Search By Reference Number" onClick={() => handleShowHide('showrefnum')}></i>
+                        </div>
+                        {showdates && (
+                            <div className="form-group" name="OrderActivityForm" style={{ display: 'inline-block' }}>
+                                <label>Start Date: </label>
+                                <input disabled={Busy} value={Fromdate} onChange={(e) => setFromdate(e.target.value)} type="date" />
+                                <label> End Date: </label>
+                                <input disabled={Busy} value={ThroughDate} onChange={(e) => setThroughDate(e.target.value)} type="date" />
+                                <label>Date Filter:</label>
+                                <select onChange={(e) => setFilterSection(e.target.value)} value={FilterSection}>
+                                    {/* options mapping */}
+                                </select>
 
-                    <div style="display:inline-block;margin-left:0.5em;cursor:pointer" ng-show="!vmReport.Busy">
-                        <i class="fa fa-search" ng-click="(togglingTenant == 'RF') ? vmReport.loadRFOrder() : vmReport.search()"></i>
+                                <div style={{ display: 'inline-block', marginLeft: '0.5em', cursor: 'pointer' }} onClick={() => { togglingTenant === 'RF' ? loadRFOrder() : search() }}>
+                                    <i className="fa fa-search"></i>
+                                </div>
+                                <div style={{ display: 'inline-block', margin: '0 auto' }}>
+                                    {Busy && <i className="fa fa-spinner fa-spin"></i>}
+                                </div>
+                                {ValidateError && (
+                                    <span className="help-block with-errors">
+                                        End date cannot be earlier than the Start date
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        {showrefnum && (
+                            <div className="form-group" style={{ display: 'inline-block' }}>
+                                <label>Search By</label>
+                                <select onChange={(e) => setFilterReferenceNoSection(e.target.value)} value={FilterReferenceNoSection}>
+                                    {/* options mapping */}
+                                </select>
+                                <input className="input" disabled={BusyRef} type="text" required value={ReferenceNo} onChange={(e) => setReferenceNo(e.target.value)} />
+                                <div style={{ display: 'inline-block', marginLeft: '0.5em', cursor: 'pointer' }} onClick={searchbyReferenceNo}>
+                                    <i className="fa fa-search"></i>
+                                </div>
+                                <div style={{ display: 'inline-block', margin: '0 auto' }}>
+                                    {BusyRef && <i className="fa fa-spinner fa-spin"></i>}
+                                </div>
+                            </div>
+                        )}
+                        <div style={{ display: 'inline-block', float: 'right', margin: '0 auto', cursor: 'pointer' }}>
+                            {hasAccess && (
+                                <button className="btn btn-sm" onClick={inValidateConfirm} disabled={!hasAccess}>Invalidate Order</button>
+                            )}
+                        </div>
                     </div>
-                    <div style="display:inline-block; margin:0 auto;" ng-show="vmReport.Busy">
-                        <i class="fa fa-spinner fa-spin"></i>
-                    </div>
-                    <span class="help-block with-errors" ng-show="vmReport.ValidateError">
-                        End date cannot be earlier than the Start date
-                    </span>
                 </div>
-                <div ng-show="vmReport.showrefnum" class="form-group" style="display:inline-block">
-                    <label>Search By</label>
-                    <select ng-change="vmReport.changerefSelect(vmReport.FilterReferenceNoSection)" ng-model="vmReport.FilterReferenceNoSection" ng-options="obj.value as obj.title for obj in vmReport.ReferencenoFilterSelection"></select>
-                    <input class="input" ng-disabled="vmReport.DisableReferenceNo" type="text" required ng-model="vmReport.ReferenceNo" />
-                    <div style="display:inline-block;margin-left:0.5em;cursor:pointer" ng-show="!vmReport.BusyRef">
-                        <i class="fa fa-search" ng-click="vmReport.searchbyReferenceNo()"></i>
-                    </div>
-                    <div style="display:inline-block; margin:0 auto;" ng-show="vmReport.BusyRef">
-                        <i class="fa fa-spinner fa-spin"></i>
-                    </div>
-                </div>
-                <div style="display:inline-block;float:right; margin:0 auto;cursor:pointer">
-                    <button class="btn btn-sm" ng-show="hasAccess" ng-click="vmReport.inValidateConfirm()" ng-disabled="inValidBtnEnable">Invalidate Order</button>
-                </div>
-            </div>
-            <div id="serviceGrid" ui-grid="vmReport.serviceGrid"
-                 ui-grid-grouping
-                 ui-grid-move-columns
-                 ui-grid-selection
-                 ui-grid-auto-resize
-                 ui-grid-edit
-                 ui-grid-pagination
-                 ui-grid-exporter
-                 ui-grid-resize-columns
-                 ui-grid-pinning
-                 ui-grid-cellnav
-                 ui-grid-expandable class="ui-grid-selectable">
+                <div className="col-lg-1"></div>
             </div>
         </div>
-        <div class="col-lg-1"></div>
-    </div>
-</div>
+    );
+};
+export default PsReporting;
