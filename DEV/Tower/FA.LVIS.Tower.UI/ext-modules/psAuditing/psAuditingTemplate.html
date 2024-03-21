@@ -1,60 +1,77 @@
-﻿<div antiforgerytoken></div>
-<div ng-controller="psAuditingController as vmAudit" class="ps-dashboard-header">
-    <ul class="breadcrumb">
-        <li class="subbreadcrumb">
-            <ps-sub-menu>
-                <ps-sub-menu-item label="Auditing Summary" activetab="Auditing Summary" route="auditing">Auditing Summary</ps-sub-menu-item>
-            </ps-sub-menu>
+import React, { useState, useEffect } from 'react';
+
+interface AuditingProps {
+  fromDate: string;
+  throughDate: string;
+  disableDate: boolean;
+  busy: boolean;
+  validateError: boolean;
+  dateFilterSelection: Array<{ value: string, title: string }>;
+  changeSelect: (filterSection: string) => void;
+  search: () => void;
+}
+
+const AuditingSummary: React.FC<AuditingProps> = ({ fromDate, throughDate, disableDate, busy, validateError, dateFilterSelection, changeSelect, search }) => {
+  const [startDate, setStartDate] = useState(fromDate);
+  const [endDate, setEndDate] = useState(throughDate);
+
+  useEffect(() => {
+    setStartDate(fromDate);
+    setEndDate(throughDate);
+  }, [fromDate, throughDate]);
+
+  return (
+    <div className="ps-dashboard-header">
+      <ul className="breadcrumb">
+        <li className="subbreadcrumb">
+          {/* Replace ps-sub-menu with appropriate React component or custom implementation */}
+          {/* ps-sub-menu-item should also be replaced accordingly */}
+          <div>Auditing Summary</div>
         </li>
-    </ul>
-    <div class="wrapper">
-        <div class="col-lg-1"></div>
-        <div class="col-lg-10">
-            <ul class="ps-page-title">
-                <li>Auditing Summary</li>
-            </ul>
+      </ul>
+      <div className="wrapper">
+        <div className="col-lg-1"></div>
+        <div className="col-lg-10">
+          <ul className="ps-page-title">
+            <li>Auditing Summary</li>
+          </ul>
 
-            <div growl inline="true"></div>
+          {/* Inline notifications or growls can be replaced with a React toast/notification library */}
+          <div></div> 
 
-            <div class="form-group">
-                <label>Start Date: </label>
-                <input  ng-disabled="vmAudit.Disabledate" ng-model="vmAudit.Fromdate" datetime-picker date-format="MM/dd/yyyy" date-only />
-                <label> End Date: </label>
-                <input  ng-disabled="vmAudit.Disabledate" name="input" ng-model="vmAudit.ThroughDate" datetime-picker date-format="MM/dd/yyyy" future-only date-only />
-                <label>Date Filter:</label>
-                <select ng-change="vmAudit.changeSelect(vmAudit.FilterSection)" ng-model="vmAudit.FilterSection" ng-options="obj.value as obj.title for obj in vmAudit.DateFilterSelection"></select>
+          <div className="form-group">
+            <label>Start Date: </label>
+            <input disabled={disableDate} value={startDate} onChange={e => setStartDate(e.target.value)} type="date" />
+            <label> End Date: </label>
+            <input disabled={disableDate} value={endDate} onChange={e => setEndDate(e.target.value)} type="date" />
+            <label>Date Filter:</label>
+            <select onChange={e => changeSelect(e.target.value)} value={dateFilterSelection.find(obj => obj.value === startDate)?.value}>
+              {dateFilterSelection.map((obj, index) => (
+                <option key={index} value={obj.value}>{obj.title}</option>
+              ))}
+            </select>
 
-
-                <div style="display:inline-block;margin-left:0.5em;cursor:pointer" ng-show="!vmAudit.Busy">
-                    <i class="fa fa-search" ng-click="vmAudit.search()" ></i>
-                </div>
-                <div style="display:inline-block; margin:0 auto;" ng-show="vmAudit.Busy">
-                    <i class="fa fa-spinner fa-spin"></i>
-                </div>
-                <span class="help-block with-errors" ng-show="vmAudit.ValidateError">
-                    End date cannot be earlier than the Start date
-                </span>
+            {/* Conditional rendering based on busy state */}
+            <div style={{display: 'inline-block', marginLeft: '0.5em', cursor: 'pointer'}} onClick={() => !busy && search()}>
+              {!busy ? <i className="fa fa-search"></i> : <i className="fa fa-spinner fa-spin"></i>}
             </div>
+            {validateError && (
+              <span className="help-block with-errors">
+                End date cannot be earlier than the Start date
+              </span>
+            )}
+          </div>
 
-            <div id="serviceGrid" ui-grid="vmAudit.serviceGrid"
-                 ui-grid-grouping
-                 ui-grid-move-columns
-                 ui-grid-selection
-                 ui-grid-auto-resize
-                 ui-grid-cellNav
-                 ui-grid-edit
-                 ui-grid-resize-columns
-                 ui-grid-exporter
-                 ui-grid-cellnav
-                 ui-grid-custom-cell-select
-                 ui-grid-pagination class="ui-grid-selectable">
-            </div>
+          {/* ui-grid could be replaced with a React table library like react-table or ag-Grid */}
+          <div id="serviceGrid" className="ui-grid-selectable">
+            {/* Grid content */}
+          </div>
 
         </div>
-        <div class="col-lg-1"></div>
+        <div className="col-lg-1"></div>
+      </div>
+    </div>
+  );
+};
 
-        
-
-     </div>
-        
-</div>
+export default AuditingSummary;
