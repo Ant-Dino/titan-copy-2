@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 angular.module('psAuditing').controller('psAuditingController', psAuditingController);
 angular.module('psAuditing').controller('psAuditingsRowEditCtrl', psAuditingsRowEditCtrl);
@@ -64,12 +64,12 @@ function psAuditingController($scope, $rootScope, $http, $interval, $uibModal, u
         'value': '90'
     },
     {
-        'title': 'Last 60 Days',
-        'value': '60'
+       'title': 'Last 60 Days',
+       'value': '60'
     },
     {
-       'title': 'Last 30 Days',
-       'value': '30'
+        'title': 'Last 30 Days',
+        'value': '30'
     },
     {
         'title': 'Last 15 Days',
@@ -123,145 +123,3 @@ function psAuditingController($scope, $rootScope, $http, $interval, $uibModal, u
             { field: 'NewValue', name: 'New Value', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true }
         ],
         rowTemplate: "<div ng-dblclick=\"grid.appScope.vmAudit.editAudit(grid, row)\" ng-repeat=\"(colRenderIndex, col) in colContainer.renderedColumns track by col.colDef.name\" class=\"ui-grid-cell\" ng-class=\"{ 'ui-grid-row-header-cell': col.isRowHeader }\" ui-grid-cell></div>",
-
-        onRegisterApi: function (gridApi) {
-            vmAudit.serviceGrid.gridApi = gridApi;
-           
-        }
-    };
-
-    vmAudit.search = search;
-    search();
-    vmAudit.ValidateDate = ValidateDate;
-
-    vmAudit.ValidateError = false;
-    function ValidateDate() {
-
-        var StartDate = new Date(vmAudit.Fromdate);
-        var EndDate = new Date(vmAudit.ThroughDate);
-
-        vmAudit.ValidateError = false;
-        if (EndDate < StartDate)
-            vmAudit.ValidateError = true;
-    }
-    vmAudit.changeSelect = changeSelect;
-
-    function changeSelect(item) {
-
-        if (item == 1)
-            vmAudit.Disabledate = false;
-        else
-            vmAudit.Disabledate = true;
-    }
-
-
-
-    $scope.expandAll = function () {
-        $scope.gridApi.treeBase.expandAllRows();
-    };
-
-    $scope.close = function (result) {
-        close(result, 500); // close, but give 500ms for bootstrap to animate
-    };
-
-    $scope.toggleRow = function (rowNum) {
-        $scope.gridApi.treeBase.toggleRowTreeState($scope.gridApi.grid.renderContainers.body.visibleRowCache[rowNum]);
-    };
-
-    $scope.changeGrouping = function () {
-        $scope.gridApi.grouping.clearGrouping();
-        $scope.gridApi.grouping.groupColumn('Name');
-    };
-
-    function search() {
-
-        if (vmAudit.gmessage != undefined)
-            vmAudit.gmessage.destroy();
-
-        if (vmAudit.FilterSection == "1") {
-
-            if (!vmAudit.Fromdate || !vmAudit.ThroughDate) {
-                vmAudit.gmessage= growl.error("Please enter a valid Start/End date");
-                return;
-            }
-
-            ValidateDate();
-
-            if (vmAudit.ValidateError) {
-                vmAudit.gmessage= growl.error("End date cannot be earlier than the Start date");
-                return;
-            }
-
-            var Details = {
-                search: vmAudit.txtSearch,
-                Fromdate: vmAudit.Fromdate.toString(),
-                ThroughDate: vmAudit.ThroughDate.toString()
-            }
-            vmAudit.Busy = true;
-            $http.post(psAuditingApiUri.GetAuditDetails, Details)
-           .then(function (response) {
-               vmAudit.Busy = false;
-               vmAudit.serviceGrid.data = response.data;
-           }, function (data) {
-               vmAudit.gmessage= growl.error(data.data);
-           });
-
-        }
-        else
-        {
-            vmAudit.Busy = true;
-            $http.get('AuditController/GetAuditDetailsFilter/'+vmAudit.FilterSection)
-           .then(function (response) {
-               vmAudit.Busy = false;
-               vmAudit.serviceGrid.data = response.data;
-           }, function (data) {
-               vmAudit.gmessage= growl.error(data.data);
-           });
-
-        }
-    }
-
-
-}
-
-
-psAuditingsRowEditor.$inject = ['$http', '$rootScope', '$uibModal'];
-function psAuditingsRowEditor($http, $rootScope, $uibModal) {
-
-    var service = {};
-    service.editAudit = editAudit;
-
-    function editAudit(grid, row) {
-        $uibModal.open({
-            templateUrl: 'ext-modules/psAuditing/Auditing-edit.html',
-            controller: ['$http', '$uibModalInstance', 'grid', 'row', '$window', '$scope', psAuditingsRowEditCtrl],
-            controllerAs: 'vmAudit',
-            resolve: {
-                grid: function () {
-                    return grid;
-                },
-                row: function () {
-                    return row;
-                }
-            }
-        });
-    }
-
-    return service;
-}
-
-
-function psAuditingsRowEditCtrl($http, $uibModalInstance, grid, row, $window, $scope) {
-
-    var vmAudit = this;
-    vmAudit.entity = angular.copy(row.entity);
-
-
-}
-
-function psAuditingApiUri() {
-    this.GetAuditDetails = 'api/audit/GetAuditDetails/';
-}
-
-
-
