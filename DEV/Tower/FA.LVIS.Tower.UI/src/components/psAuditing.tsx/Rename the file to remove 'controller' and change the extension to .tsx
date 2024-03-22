@@ -1,35 +1,41 @@
 import React, { useState, useEffect } from 'react';
 
-const AuditingComponent = () => {
-  // State hooks for component
+const useAccessRights = () => {
   const [hasAccess, setHasAccess] = useState(false);
-  const [auditData, setAuditData] = useState([]);
-  const [dateFilter, setDateFilter] = useState('7'); // Default to 'Last 7 Days'
-  const [fromDate, setFromDate] = useState('');
-  const [throughDate, setThroughDate] = useState('');
-  const [validateError, setValidateError] = useState(false);
 
-  // Effect hook to check access rights and fetch initial data
   useEffect(() => {
-    // Simulate fetching user access rights
     const userRights = { activityRight: 'Admin' }; // This should be fetched from context or API
     if (userRights.activityRight === 'SuperAdmin' || userRights.activityRight === 'Admin') {
       setHasAccess(true);
     } else {
       setHasAccess(false);
-      // Redirect or show unauthorized message
+      // Redirect or show unauthorized message here
     }
-
-    // Fetch initial audit data
-    fetchAuditData();
   }, []);
 
-  const fetchAuditData = () => {
+  return hasAccess;
+};
+
+const useAuditData = (dateFilter) => {
+  const [auditData, setAuditData] = useState([]);
+
+  useEffect(() => {
     // Placeholder for fetching audit data based on date filter
     console.log('Fetching audit data...');
-    // Update state with fetched data
+    // Update state with fetched data here
     // setAuditData(fetchedData);
-  };
+  }, [dateFilter]);
+
+  return auditData;
+};
+
+const AuditingComponent = () => {
+  const hasAccess = useAccessRights();
+  const [dateFilter, setDateFilter] = useState('7'); // Default to 'Last 7 Days'
+  const [fromDate, setFromDate] = useState('');
+  const [throughDate, setThroughDate] = useState('');
+  const [validateError, setValidateError] = useState(false);
+  const auditData = useAuditData(dateFilter);
 
   const handleDateFilterChange = (event) => {
     setDateFilter(event.target.value);
