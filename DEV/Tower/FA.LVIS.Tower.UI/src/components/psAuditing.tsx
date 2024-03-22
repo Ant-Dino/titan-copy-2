@@ -1,8 +1,9 @@
+  
 import React, { useState, useEffect } from 'react';
-
+ 
 const useAccessRights = () => {
   const [hasAccess, setHasAccess] = useState(false);
-
+ 
   useEffect(() => {
     const checkAccessRights = () => {
       const userHasAccess = true;
@@ -10,14 +11,14 @@ const useAccessRights = () => {
     };
     checkAccessRights();
   }, []);
-
+ 
   return hasAccess;
 };
-
+ 
 const useAuditData = (initialFilter) => {
   const [auditData, setAuditData] = useState([]);
   const [dateFilter, setDateFilter] = useState(initialFilter);
-
+ 
   const fetchAuditData = (filter) => {
     console.log(`Fetching audit data with filter: ${filter}`);
     const exampleData = [
@@ -26,19 +27,19 @@ const useAuditData = (initialFilter) => {
     ];
     setAuditData(exampleData);
   };
-
+ 
   useEffect(() => {
     fetchAuditData(dateFilter);
   }, [dateFilter]);
-
+ 
   return { auditData, setDateFilter };
 };
-
+ 
 const useDateValidation = () => {
   const [fromDate, setFromDate] = useState('');
   const [throughDate, setThroughDate] = useState('');
   const [validateError, setValidateError] = useState(false);
-
+ 
   const validateDateRange = () => {
     const startDate = new Date(fromDate);
     const endDate = new Date(throughDate);
@@ -48,20 +49,20 @@ const useDateValidation = () => {
       setValidateError(false);
     }
   };
-
+ 
   return { fromDate, setFromDate, throughDate, setThroughDate, validateError, validateDateRange };
 };
-
+ 
 const AuditingComponent = () => {
   const hasAccess = useAccessRights();
   const { auditData, setDateFilter } = useAuditData('7');
   const { fromDate, setFromDate, throughDate, setThroughDate, validateError, validateDateRange } = useDateValidation();
-
+ 
   const handleDateFilterChange = (event) => {
     const newFilter = event.target.value;
     setDateFilter(newFilter);
   };
-
+ 
   // Render component
   return (
     <div>
@@ -90,5 +91,5 @@ const AuditingComponent = () => {
     </div>
   );
 };
-
+ 
 export default AuditingComponent;
