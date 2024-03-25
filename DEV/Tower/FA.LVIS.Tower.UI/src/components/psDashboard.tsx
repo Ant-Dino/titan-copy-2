@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
-const DashboardComponent = () => {
+// Separate the business logic, state management and API calls
+const useDashboardLogic = () => {
   const [currentUser, setCurrentUser] = useState({});
   const [hasAccess, setHasAccess] = useState(false);
   const [hasBEQAccess, setHasBEQAccess] = useState(false);
   const [hasTEQAccess, setHasTEQAccess] = useState(false);
   const [BEQSummaryList, setBEQSummaryList] = useState([]);
   const [TEQSummaryList, setTEQSummaryList] = useState([]);
-
   useEffect(() => {
     getCurrentUser();
   }, []);
-
   const getCurrentUser = async () => {
     try {
       const response = await axios.get('/UserInfo/getUser');
@@ -22,14 +20,12 @@ const DashboardComponent = () => {
       console.error('Error fetching user info:', error);
     }
   };
-
   const setAccessRights = (userData) => {
     const { CanManageTEQ, CanManageBEQ, ActivityRight } = userData;
     setHasBEQAccess(CanManageBEQ);
     setHasTEQAccess(CanManageTEQ);
     setHasAccess(ActivityRight === 'Admin' || ActivityRight === 'SuperAdmin');
   };
-
   const loadBEQExceptions = async () => {
     try {
       const response = await axios.get('/Dashboard/BEQException/');
@@ -38,7 +34,6 @@ const DashboardComponent = () => {
       console.error('Error loading BEQ exceptions:', error);
     }
   };
-
   const loadTEQExceptions = async () => {
     try {
       const response = await axios.get('/Dashboard/TEQException/');
@@ -47,7 +42,6 @@ const DashboardComponent = () => {
       console.error('Error loading TEQ exceptions:', error);
     }
   };
-
   useEffect(() => {
     if (hasBEQAccess) {
       loadBEQExceptions();
@@ -56,7 +50,25 @@ const DashboardComponent = () => {
       loadTEQExceptions();
     }
   }, [hasBEQAccess, hasTEQAccess]);
-
+  return {
+    currentUser,
+    hasAccess,
+    hasBEQAccess,
+    hasTEQAccess,
+    BEQSummaryList,
+    TEQSummaryList,
+  };
+};
+const DashboardComponent = () => {
+  // Utilize custom hook for logic separation
+  const {
+    currentUser,
+    hasAccess,
+    hasBEQAccess,
+    hasTEQAccess,
+    BEQSummaryList,
+    TEQSummaryList,
+  } = useDashboardLogic();
   return (
     <div>
       <h1>Dashboard</h1>
@@ -64,5 +76,4 @@ const DashboardComponent = () => {
     </div>
   );
 };
-
 export default DashboardComponent;
