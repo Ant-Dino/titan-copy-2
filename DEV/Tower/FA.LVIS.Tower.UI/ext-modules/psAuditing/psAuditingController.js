@@ -1,9 +1,7 @@
-
 angular.module('psAuditing').controller('psAuditingController', psAuditingController);
 angular.module('psAuditing').controller('psAuditingsRowEditCtrl', psAuditingsRowEditCtrl);
 angular.module('psAuditing').service('psAuditingsRowEditor', psAuditingsRowEditor);
 angular.module('psAuditing').service('psAuditingApiUri', psAuditingApiUri);
-
 psAuditingController.$inject = ['$scope', '$rootScope', '$http', '$interval', '$uibModal',  'uiGridGroupingConstants', '$window', '$filter', '$confirm', 'UserInfo', '$location', '$cookies', 'growl','psAuditingsRowEditor','psAuditingApiUri'];
 function psAuditingController($scope, $rootScope, $http, $interval, $uibModal, uiGridGroupingConstants, $window, $filter, $confirm, UserInfo, $location, $cookies, growl, psAuditingsRowEditor, psAuditingApiUri) {
     var vmAudit = this;
@@ -63,8 +61,8 @@ function psAuditingController($scope, $rootScope, $http, $interval, $uibModal, u
         'value': '90'
     },
     {
-        'title': 'Last 60 Days',
-        'value': '60'
+       'title': 'Last 60 Days',
+       'value': '60'
     },
     {
        'title': 'Last 30 Days',
@@ -115,7 +113,6 @@ function psAuditingController($scope, $rootScope, $http, $interval, $uibModal, u
             { field: 'EventDateutc', name: 'Date', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
             { field: 'EventType', name: 'Activity Type ', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
               { field: 'Section', name: 'Section', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-          //{ field: 'TableName', name: 'Table', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
             { field: 'RecordId', name: 'Record', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
             { field: 'Property', name: 'Property', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
             { field: 'OriginalValue', name: 'Original Value', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
