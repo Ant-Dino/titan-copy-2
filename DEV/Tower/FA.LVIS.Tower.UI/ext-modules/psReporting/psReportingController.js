@@ -1,16 +1,36 @@
+"use strict";
 
-﻿"use strict";
+angular.module('psReporting').service('psReportingService', psReportingService);
+psReportingService.$inject = ['$http', '$cookies', 'growl'];
+function psReportingService($http, $cookies, growl) {
+    return {
+        getUserInfo: function () {
+            return $http.get('/userInfoEndpoint').then(function (response) {
+                return response.data;
+            });
+        },
+        invalidateOrders: function (orderToInvalidate) {
+            return $http.post('/InvalidateOrderDataEndpoint', orderToInvalidate).then(function (response) {
+                return response.data;
+            });
+        },
+        getReportDetails: function (details, togglingTenant) {
+            return $http.post('/GetReportDetailsEndpoint/' + togglingTenant, details).then(function (response) {
+                return response.data;
+            });
+        },
+        getReportDetailsWithFilter: function (filterSection, togglingTenant) {
+            return $http.get('/GetReportDetailsFilterEndpoint/' + filterSection + '/' + togglingTenant).then(function (response) {
+                return response.data;
+            });
+        }
+    };
+}
 
-angular.module('psReporting').controller('psReportingController', psReportingController);
-//angular.module('psReporting').controller('psReportingRowEditCtrl', psReportingRowEditCtrl);
-angular.module('psReporting').service('psReportingRowEditor', psReportingRowEditor);
-
-psReportingController.$inject = ['$scope', '$rootScope', '$http', '$interval', '$uibModal', 'uiGridGroupingConstants', '$templateCache', '$window', '$filter', '$confirm', 'UserInfo', '$location', '$cookies', 'growl', 'psReportingRowEditor','modalProvider'];
-function psReportingController($scope, $rootScope, $http, $interval, $uibModal, uiGridGroupingConstants, $templateCache, $window, $filter, $confirm, UserInfo, $location, $cookies, growl, psReportingRowEditor, modalProvider) {
+angular.module('psReporting').controller('psReportingController', ['$scope', '$rootScope', 'psReportingService', 'uiGridGroupingConstants', '$templateCache', '$window', '$filter', '$confirm', 'UserInfo', '$location', '$cookies', 'growl', 'modalProvider', function ($scope, $rootScope, psReportingService, uiGridGroupingConstants, $templateCache, $window, $filter, $confirm, UserInfo, $location, $cookies, growl, modalProvider) {
     var vmReport = this;
     $scope.orderToInvalidate = [];
     $scope.inValidBtnEnable = true; //Invalidate Button to be disabled.
-    //$scope.pageLoader = false;
     $scope.loggedTenant = $rootScope.tenantname;
     $scope.togglingTenant = $rootScope.tenantname;
 
@@ -20,22 +40,18 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
         $rootScope.canmanagebeq = response.CanManageBEQ;
     });
 
-    if (!$rootScope.activityright) {
-        $rootScope.activityright = $cookies.get('activityright');
+    function checkUserRights() {
+        if (!$rootScope.activityright) {
+            $rootScope.activityright = $cookies.get('activityright');
+        }
+        if ($rootScope.activityright !== 'Admin' && $rootScope.activityright !== 'SuperAdmin' && $rootScope.activityright !== 'User') {
+            psReportingService.getUserInfo().then(function (response) {
+                $rootScope.$broadcast('getUser', response);
+                search();
+            });
+        }
     }
-
-    if ($rootScope.activityright !== 'Admin' && $rootScope.activityright !== 'SuperAdmin' && $rootScope.activityright !== 'User') {
-        UserInfo.getUser().then(function (response) {
-            $rootScope.$broadcast('getUser', response);
-            //$rootScope.activityright = response.ActivityRight;
-            //$rootScope.canmanagebeq = response.CanManageBEQ;
-            //$rootScope.canmanageteq = response.CanManageTEQ;
-            search();
-
-        }, function (error) {
-
-        });
-    }
+    checkUserRights();
 
     var hasAccess = false;
     var hasSuperAccess = false;
@@ -53,16 +69,14 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
     $rootScope.hasSuperAccess = hasSuperAccess;
 
     var newDate = new Date();
-    var date = new Date();
     vmReport.Fromdate = $filter('date')(new Date(), 'MM/dd/yyyy');
     vmReport.ThroughDate = $filter('date')(new Date(), 'MM/dd/yyyy');
 
     vmReport.Busy = false;
-    vmReport.editReportRow = psReportingRowEditor.editReportRow;      
     vmReport.DateFilterSelection = [
     {
-         'title': 'Custom',
-         'value': '1'
+        'title': 'Custom',
+        'value': '1'
     },
     {
         'title': 'Last 90 Days',
@@ -94,7 +108,6 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
     }
     ];
     
-    //Search FUnctionality by Reference No
     vmReport.ReferencenoFilterSelection = [{
         'title': '---Select---',
         'value': '0'
@@ -116,21 +129,12 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
     'value': '4'
     }
     ];
-    //Search FUnctionality by Reference No
+    //Search Functionality by Reference No
 
     vmReport.FilterSection = '7';
     vmReport.Disabledate = true;
     
-   //// $templateCache.put('ui-grid/selectionRowHeaderButtons',
-   ////"<div class=\"ui-grid-selection-row-header-buttons \" ng-class=\"{'ui-grid-row-selected': row.isSelected}\" ><input style=\"margin: 0; vertical-align: middle\" type=\"checkbox\" ng-model=\"row.isSelected\" ng-click=\"row.isSelected=!row.isSelected;selectButtonClick(row, $event)\">&nbsp;</div>"
-   //// );
-
-    ////$templateCache.put('ui-grid/selectionSelectAllButtons',
-    ////  "<div class=\"ui-grid-selection-row-header-buttons \" ng-class=\"{'ui-grid-all-selected': grid.selection.selectAll}\" ng-if=\"grid.options.enableSelectAll\"><input style=\"margin: 0; vertical-align: middle\" type=\"checkbox\" ng-model=\"grid.selection.selectAll\" ng-click=\"grid.selection.selectAll=!grid.selection.selectAll;headerButtonClick($event)\"></div>"
-    ////);
-    
     var detailButton = '<div ng-if="!col.grouping || col.grouping.groupPriority === undefined || col.grouping.groupPriority === null || ( row.groupHeader && col.grouping.groupPriority === row.treeLevel )" class="ui-grid-cell-contents"> <i ng-show="(row.treeNode.children && row.treeNode.children.length == 0)" class="fa fa-times-circle" style="color:red;padding:5px 25px;text-align:center;cursor:pointer"></i></div>'
-    // var TestSettings = '<div style="word-wrap: normal" title="{{row.getProperty(col.field)}}">{{row.getProperty(col.field)}}</div>';
     vmReport.serviceGrid = {
         enableColumnResize: true,
         treeRowHeaderAlwaysVisible: true,
@@ -165,9 +169,6 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
 
         onRegisterApi: function (gridApi) {
             vmReport.serviceGrid.gridApi = gridApi;
-            gridApi.cellNav.on.navigate($scope, function (newRowCol, oldRowCol) {                
-                console.log('navigation event');
-            });
             gridApi.selection.on.rowSelectionChanged($scope, function (row) {
 
                 console.log("Row " + row.entity + " selected: " + row.isSelected);
@@ -183,12 +184,6 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
                 }
 
             });//end single row
-            
-            ////// Multiple row selections
-            ////gridApi.selection.on.rowSelectionChangedBatch($scope, function (rows) {
-            ////    console.log("multiple items checked");
-            ////});
-
         },
     };
 
@@ -205,42 +200,34 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
     
     function inValidateProcess() {
         console.log("entered invalidate process method.");
-        //$scope.modalInstance.close();
-        //$scope.pageLoader = true;
-            $http.post('ReportingController/InvalidateOrderData', $scope.orderToInvalidate)
-               .success(function (data) {
-                   $scope.orderToInvalidate = [];
+        psReportingService.invalidateOrders($scope.orderToInvalidate).then(function (data) {
+            $scope.orderToInvalidate = [];
 
-                   if (data.length > 0) {
-                       growl.error('Failed to Invalidate following Service Request ID:' + data.join(','));
-                       //$scope.pageLoader = false;
-                       $scope.inValidBtnEnable = true;
-                       return;
-                   }
-                   else {                       
-                       if (vmReport.FilterSection == "1") {
-                           var Details = {
-                               Fromdate: vmReport.Fromdate.toString(),
-                               ThroughDate: vmReport.ThroughDate.toString()
-                           }
-                           $http.post('ReportingController/GetReportDetails/' + $scope.togglingTenant, Details)
-                           .then(function (response) {
-                               vmReport.serviceGrid.data = response.data;
-                               $scope.inValidBtnEnable = true;
-                               growl.success('Record(s) Invalidated Successfully');
-                           });
-                       } else {
-                           $http.get('ReportingController/GetReportDetailsFilter/' + vmReport.FilterSection + '/' + $scope.togglingTenant)
-                             .then(function (response) {
-                                 vmReport.serviceGrid.data = response.data;
-                                 $scope.inValidBtnEnable = true;
-                                 growl.success('Record(s) Invalidated Successfully');
-                             });
-                       }
-                   }
-                   //$scope.modalInstance.close();
-               });   
-        
+            if (data.length > 0) {
+                growl.error('Failed to Invalidate following Service Request ID:' + data.join(','));
+                $scope.inValidBtnEnable = true;
+                return;
+            }
+            else {                       
+                if (vmReport.FilterSection == "1") {
+                    var Details = {
+                        Fromdate: vmReport.Fromdate.toString(),
+                        ThroughDate: vmReport.ThroughDate.toString()
+                    }
+                    psReportingService.getReportDetails(Details, $scope.togglingTenant).then(function (response) {
+                        vmReport.serviceGrid.data = response;
+                        $scope.inValidBtnEnable = true;
+                        growl.success('Record(s) Invalidated Successfully');
+                    });
+                } else {
+                    psReportingService.getReportDetailsWithFilter(vmReport.FilterSection, $scope.togglingTenant).then(function (response) {
+                        vmReport.serviceGrid.data = response;
+                        $scope.inValidBtnEnable = true;
+                        growl.success('Record(s) Invalidated Successfully');
+                    });
+                }
+            }
+        });   
         
     };
 
@@ -290,10 +277,9 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
             }
             vmReport.Busy = true;
 
-            $http.post('ReportingController/GetReportDetails/' + $scope.togglingTenant, Details)
-            .then(function (response) {
+            psReportingService.getReportDetails(Details, $scope.togglingTenant).then(function (response) {
                     if (!vmReport.showrefnum) {
-                        vmReport.serviceGrid.data = response.data;
+                        vmReport.serviceGrid.data = response;
                     }
                     vmReport.Busy = false;                
             });
@@ -301,13 +287,12 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
         else
         {
             vmReport.Busy = true; 
-            $http.get('ReportingController/GetReportDetailsFilter/' + vmReport.FilterSection + '/' + $scope.togglingTenant)
-              .then(function (response) {
-                      if (!vmReport.showrefnum) {
-                          vmReport.serviceGrid.data = response.data;
-                      }
-                      vmReport.Busy = false;                  
-              });
+            psReportingService.getReportDetailsWithFilter(vmReport.FilterSection, $scope.togglingTenant).then(function (response) {
+                    if (!vmReport.showrefnum) {
+                        vmReport.serviceGrid.data = response;
+                    }
+                    vmReport.Busy = false;                  
+            });
         }
     }
 
@@ -333,10 +318,9 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
             }
             vmReport.BusyRef = true;
             
-            $http.post('ReportingController/GetReportDetailsbyReferenceFilter/' + $scope.togglingTenant, FDetails)
-              .then(function (response) {
-                    vmReport.serviceGrid.data = response.data;
-                    vmReport.BusyRef = false;
+            psReportingService.getReportDetailsbyReferenceFilter($scope.togglingTenant, FDetails).then(function (response) {
+                vmReport.serviceGrid.data = response;
+                vmReport.BusyRef = false;
              });           
         }
     }  
@@ -355,4 +339,3 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
             }
             ValidateDate();
             if (vmReport.ValidateError) {
-               
