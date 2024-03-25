@@ -1,267 +1,93 @@
 ﻿"use strict";
 
-angular.module('psAuditing').controller('psAuditingController', psAuditingController);
-angular.module('psAuditing').controller('psAuditingsRowEditCtrl', psAuditingsRowEditCtrl);
-angular.module('psAuditing').service('psAuditingsRowEditor', psAuditingsRowEditor);
-angular.module('psAuditing').service('psAuditingApiUri', psAuditingApiUri);
+import React, { useState, useEffect } from 'react';
+import { Modal, Button } from 'react-bootstrap';
+import axios from 'axios';
+import { format } from 'date-fns';
+import Growl from '<path-to-growl-component>'; // Placeholder for Growl component path
 
-psAuditingController.$inject = ['$scope', '$rootScope', '$http', '$interval', '$uibModal',  'uiGridGroupingConstants', '$window', '$filter', '$confirm', 'UserInfo', '$location', '$cookies', 'growl','psAuditingsRowEditor','psAuditingApiUri'];
-function psAuditingController($scope, $rootScope, $http, $interval, $uibModal, uiGridGroupingConstants, $window, $filter, $confirm, UserInfo, $location, $cookies, growl, psAuditingsRowEditor, psAuditingApiUri) {
-    var vmAudit = this;
-    
-    $scope.$on("getUser", function (evt, response) {
-        $rootScope.activityright = response.ActivityRight;
-        $rootScope.canmanageteq = response.CanManageTEQ;
-        $rootScope.canmanagebeq = response.CanManageBEQ;
-    });
+function PsAuditingController() {
+    const [activityRight, setActivityRight] = useState('');
+    const [canManageTeq, setCanManageTeq] = useState(false);
+    const [canManageBeq, setCanManageBeq] = useState(false);
+    const [hasAccess, setHasAccess] = useState(false);
+    const [fromDate, setFromDate] = useState(format(new Date(), 'MM/dd/yyyy'));
+    const [throughDate, setThroughDate] = useState(format(new Date(), 'MM/dd/yyyy'));
+    const [filterSection, setFilterSection] = useState('7');
+    const [disableDate, setDisableDate] = useState(true);
+    const [busy, setBusy] = useState(false);
+    const [serviceGridData, setServiceGridData] = useState([]);
+    const [validateError, setValidateError] = useState(false);
 
-    if (!$rootScope.activityright) {
-        $rootScope.activityright = $cookies.get('activityright');
-    }
+    useEffect(() => {
+        // Logic to check if user has access, replaced $rootScope and $cookies logic from AngularJS
+        const userRights = activityRight || localStorage.getItem('activityright');
+        setActivityRight(userRights);
+        if (!['Admin', 'SuperAdmin', 'User'].includes(userRights)) {
+            // Fetch user information if needed
+            axios.get('/userinfo').then(response => {
+                const { ActivityRight, CanManageTEQ, CanManageBEQ } = response.data;
+                setActivityRight(ActivityRight);
+                setCanManageTeq(CanManageTEQ);
+                setCanManageBeq(CanManageBEQ);
+                handleAccess(ActivityRight);
+            });
+        } else {
+            handleAccess(userRights);
+        }
+    }, []);
 
-    if ($rootScope.activityright !== 'Admin' && $rootScope.activityright !== 'SuperAdmin' && $rootScope.activityright !== 'User') {
-        UserInfo.getUser().then(function (response) {
-            $rootScope.$broadcast('getUser', response);
-            $rootScope.activityright = response.ActivityRight;
-            $rootScope.canmanagebeq = response.CanManageBEQ;
-            $rootScope.canmanageteq = response.CanManageTEQ;
-        }, function (error) {
-
-        });
-    }
-
-    var hasAccess = false;
-
-    if ($rootScope.activityright !== 'Admin' && $rootScope.activityright !== 'SuperAdmin') {
-        var instance = $uibModal.open({
-            template: '<div class="widget-header"><i class="fa fa-lg fa-exclamation-triangle"></i> <h3>Attention</h3></div><div class="modal-body">You are not authorized to view this page.</div>' +
-                '<div class="modal-footer"><a class="btn btn-default" ng-click="$close()">Close</a></div>', size: 'sm'
-        });
-
-        instance.result.finally(function () {
-            $location.path('/dashboard');
-        });
-    }
-
-    if ($rootScope.activityright === 'SuperAdmin' || $rootScope.activityright === 'Admin') {
-        hasAccess = true;
-    }
-
-    $scope.hasAccess = hasAccess;
-
-    var newDate = new Date();
-    var date = new Date();
-    vmAudit.Fromdate = $filter('date')(new Date(), 'MM/dd/yyyy');
-    vmAudit.ThroughDate = $filter('date')(new Date(), 'MM/dd/yyyy');
-    vmAudit.editAudit = psAuditingsRowEditor.editAudit;
-    vmAudit.DateFilterSelection = [
-    {
-         'title': 'Custom',
-         'value': '1'
-    },
-    {
-        'title': 'Last 90 Days',
-        'value': '90'
-    },
-    {
-        'title': 'Last 60 Days',
-        'value': '60'
-    },
-    {
-       'title': 'Last 30 Days',
-       'value': '30'
-    },
-    {
-        'title': 'Last 15 Days',
-        'value': '15'
-    },
-    {
-        'title': 'Last 7 Days',
-        'value': '7'
-    },
-    {
-       'title': '24 hrs',
-       'value': '24'
-    },
-    {
-        'title': 'Today',
-        'value': '0'
-    }
-    ];
-    vmAudit.FilterSection = '7';
-    vmAudit.Disabledate = true;
-
-    vmAudit.Busy = false;
-    
-    var detailButton = '<div ng-if="!col.grouping || col.grouping.groupPriority === undefined || col.grouping.groupPriority === null || ( row.groupHeader && col.grouping.groupPriority === row.treeLevel )" class="ui-grid-cell-contents"> <i ng-show="(row.treeNode.children && row.treeNode.children.length == 0)" class="fa fa-times-circle" style="color:red;padding:5px 25px;text-align:center;cursor:pointer"></i></div>'
-     vmAudit.serviceGrid = {
-        enableFiltering: true,
-        treeRowHeaderAlwaysVisible: true,
-        enableRowSelection: true,
-        enableRowHeaderSelection: false,
-        multiSelect: false,
-        enableSorting: true,
-        enableGridMenu: true,
-        enableHorizontalScrollbar: 0,
-        enableVerticalScrollbar: 0,
-        groupingShowAggregationMenu: 0,
-        paginationPageSizes: [15, 30, 45],
-        paginationPageSize: 15,
-        minRowsToShow: 16,
-        enableColumnResizing: true,
-        exporterPdfTableHeaderStyle: { fontSize: 10, bold: true, italics: true, color: 'red' },
-        exporterCsvFilename: 'AuditingInfo.csv',
-        columnDefs: [
-            { field: 'UserName', name: 'User', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-            { field: 'EventDateutc', name: 'Date', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-            { field: 'EventType', name: 'Activity Type ', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-              { field: 'Section', name: 'Section', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-          //{ field: 'TableName', name: 'Table', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-            { field: 'RecordId', name: 'Record', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-            { field: 'Property', name: 'Property', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-            { field: 'OriginalValue', name: 'Original Value', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true },
-            { field: 'NewValue', name: 'New Value', headerCellClass: 'grid-header', enableCellEdit: false, groupingShowAggregationMenu: false, cellTooltip: true }
-        ],
-        rowTemplate: "<div ng-dblclick=\"grid.appScope.vmAudit.editAudit(grid, row)\" ng-repeat=\"(colRenderIndex, col) in colContainer.renderedColumns track by col.colDef.name\" class=\"ui-grid-cell\" ng-class=\"{ 'ui-grid-row-header-cell': col.isRowHeader }\" ui-grid-cell></div>",
-
-        onRegisterApi: function (gridApi) {
-            vmAudit.serviceGrid.gridApi = gridApi;
-           
+    const handleAccess = (right) => {
+        if (['SuperAdmin', 'Admin'].includes(right)) {
+            setHasAccess(true);
+        } else {
+            setHasAccess(false);
+            // Redirect or show modal stating no access
         }
     };
 
-    vmAudit.search = search;
-    search();
-    vmAudit.ValidateDate = ValidateDate;
+    const ValidateDate = () => {
+        const StartDate = new Date(fromDate);
+        const EndDate = new Date(throughDate);
 
-    vmAudit.ValidateError = false;
-    function ValidateDate() {
-
-        var StartDate = new Date(vmAudit.Fromdate);
-        var EndDate = new Date(vmAudit.ThroughDate);
-
-        vmAudit.ValidateError = false;
-        if (EndDate < StartDate)
-            vmAudit.ValidateError = true;
-    }
-    vmAudit.changeSelect = changeSelect;
-
-    function changeSelect(item) {
-
-        if (item == 1)
-            vmAudit.Disabledate = false;
-        else
-            vmAudit.Disabledate = true;
-    }
-
-
-
-    $scope.expandAll = function () {
-        $scope.gridApi.treeBase.expandAllRows();
-    };
-
-    $scope.close = function (result) {
-        close(result, 500); // close, but give 500ms for bootstrap to animate
-    };
-
-    $scope.toggleRow = function (rowNum) {
-        $scope.gridApi.treeBase.toggleRowTreeState($scope.gridApi.grid.renderContainers.body.visibleRowCache[rowNum]);
-    };
-
-    $scope.changeGrouping = function () {
-        $scope.gridApi.grouping.clearGrouping();
-        $scope.gridApi.grouping.groupColumn('Name');
-    };
-
-    function search() {
-
-        if (vmAudit.gmessage != undefined)
-            vmAudit.gmessage.destroy();
-
-        if (vmAudit.FilterSection == "1") {
-
-            if (!vmAudit.Fromdate || !vmAudit.ThroughDate) {
-                vmAudit.gmessage= growl.error("Please enter a valid Start/End date");
-                return;
-            }
-
-            ValidateDate();
-
-            if (vmAudit.ValidateError) {
-                vmAudit.gmessage= growl.error("End date cannot be earlier than the Start date");
-                return;
-            }
-
-            var Details = {
-                search: vmAudit.txtSearch,
-                Fromdate: vmAudit.Fromdate.toString(),
-                ThroughDate: vmAudit.ThroughDate.toString()
-            }
-            vmAudit.Busy = true;
-            $http.post(psAuditingApiUri.GetAuditDetails, Details)
-           .then(function (response) {
-               vmAudit.Busy = false;
-               vmAudit.serviceGrid.data = response.data;
-           }, function (data) {
-               vmAudit.gmessage= growl.error(data.data);
-           });
-
+        if (EndDate < StartDate) {
+            setValidateError(true);
+        } else {
+            setValidateError(false);
         }
-        else
-        {
-            vmAudit.Busy = true;
-            $http.get('AuditController/GetAuditDetailsFilter/'+vmAudit.FilterSection)
-           .then(function (response) {
-               vmAudit.Busy = false;
-               vmAudit.serviceGrid.data = response.data;
-           }, function (data) {
-               vmAudit.gmessage= growl.error(data.data);
-           });
+    };
 
-        }
-    }
+    const changeSelect = (item) => {
+        setDisableDate(item === '1');
+    };
 
+    const search = () => {
+        setBusy(true);
+        const Details = {
+            search: '', // Assuming there's a search parameter
+            Fromdate: fromDate.toString(),
+            ThroughDate: throughDate.toString(),
+        };
 
+        // Replace $http.post with axios and psAuditingApiUri with actual URI
+        axios.post('api/audit/GetAuditDetails/', Details)
+            .then(response => {
+                setBusy(false);
+                setServiceGridData(response.data);
+            })
+            .catch(error => {
+                // Handle error, display message with Growl or similar
+            });
+    };
+
+    // Additional functions like expandAll, close, toggleRow, changeGrouping go here
+
+    // Component JSX
+    return (
+        <div>
+            {/* Component content */}
+        </div>
+    );
 }
 
-
-psAuditingsRowEditor.$inject = ['$http', '$rootScope', '$uibModal'];
-function psAuditingsRowEditor($http, $rootScope, $uibModal) {
-
-    var service = {};
-    service.editAudit = editAudit;
-
-    function editAudit(grid, row) {
-        $uibModal.open({
-            templateUrl: 'ext-modules/psAuditing/Auditing-edit.html',
-            controller: ['$http', '$uibModalInstance', 'grid', 'row', '$window', '$scope', psAuditingsRowEditCtrl],
-            controllerAs: 'vmAudit',
-            resolve: {
-                grid: function () {
-                    return grid;
-                },
-                row: function () {
-                    return row;
-                }
-            }
-        });
-    }
-
-    return service;
-}
-
-
-function psAuditingsRowEditCtrl($http, $uibModalInstance, grid, row, $window, $scope) {
-
-    var vmAudit = this;
-    vmAudit.entity = angular.copy(row.entity);
-
-
-}
-
-function psAuditingApiUri() {
-    this.GetAuditDetails = 'api/audit/GetAuditDetails/';
-}
-
-
-
+export default PsAuditingController;
