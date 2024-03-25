@@ -1,4 +1,3 @@
-﻿"use strict";
 
 angular.module('psAuditing').controller('psAuditingController', psAuditingController);
 angular.module('psAuditing').controller('psAuditingsRowEditCtrl', psAuditingsRowEditCtrl);
@@ -155,7 +154,6 @@ function psAuditingController($scope, $rootScope, $http, $interval, $uibModal, u
     }
 
 
-
     $scope.expandAll = function () {
         $scope.gridApi.treeBase.expandAllRows();
     };
@@ -262,6 +260,3 @@ function psAuditingsRowEditCtrl($http, $uibModalInstance, grid, row, $window, $s
 function psAuditingApiUri() {
     this.GetAuditDetails = 'api/audit/GetAuditDetails/';
 }
-
-
-
