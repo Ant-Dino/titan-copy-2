@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosService from './axiosService'; // Updated to include axiosService
 
 const AuditingComponent = () => {
   const [activityRight, setActivityRight] = useState('');
@@ -22,7 +22,7 @@ const AuditingComponent = () => {
   // Mock of the getUser functionality, supposed to return user rights
   const getUserRights = async () => {
     try {
-      const response = await axios.get('/api/user/rights'); // Example API endpoint
+      const response = await axiosService.getUserRights(); // Updated call to use axiosService
       const { ActivityRight, CanManageTEQ, CanManageBEQ } = response.data;
       setActivityRight(ActivityRight);
       setCanManageTEQ(CanManageTEQ);
@@ -60,9 +60,9 @@ const AuditingComponent = () => {
     // Assuming the presence of an API endpoint to get either filtered or normal search results
     setBusy(true);
     try {
-      const { data } = await axios.post('/api/audit/search', {
+      const { data } = await axiosService.searchAuditLogs({ // Updated to use axiosService
         fromDate, throughDate, filterSection
-      }); // This assumes a simplified structure of request payload and endpoint.
+      }); // Updated for consistency with axios calls refactoring
       setAuditLogs(data);
     } catch (error) {
       console.error('Error fetching audit logs', error);
