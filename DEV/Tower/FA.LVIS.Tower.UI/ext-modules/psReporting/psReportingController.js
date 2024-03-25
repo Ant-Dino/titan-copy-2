@@ -1,3 +1,4 @@
+
 ﻿"use strict";
 
 angular.module('psReporting').controller('psReportingController', psReportingController);
@@ -123,7 +124,6 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
    //// $templateCache.put('ui-grid/selectionRowHeaderButtons',
    ////"<div class=\"ui-grid-selection-row-header-buttons \" ng-class=\"{'ui-grid-row-selected': row.isSelected}\" ><input style=\"margin: 0; vertical-align: middle\" type=\"checkbox\" ng-model=\"row.isSelected\" ng-click=\"row.isSelected=!row.isSelected;selectButtonClick(row, $event)\">&nbsp;</div>"
    //// );
-
 
     ////$templateCache.put('ui-grid/selectionSelectAllButtons',
     ////  "<div class=\"ui-grid-selection-row-header-buttons \" ng-class=\"{'ui-grid-all-selected': grid.selection.selectAll}\" ng-if=\"grid.options.enableSelectAll\"><input style=\"margin: 0; vertical-align: middle\" type=\"checkbox\" ng-model=\"grid.selection.selectAll\" ng-click=\"grid.selection.selectAll=!grid.selection.selectAll;headerButtonClick($event)\"></div>"
@@ -355,129 +355,4 @@ function psReportingController($scope, $rootScope, $http, $interval, $uibModal, 
             }
             ValidateDate();
             if (vmReport.ValidateError) {
-                vmReport.gmessage = growl.error("End date cannot be earlier than the Start date");
-                return;
-            }
-            var Details = {
-                Fromdate: vmReport.Fromdate.toString(),
-                ThroughDate: vmReport.ThroughDate.toString()
-            }
-            vmReport.Busy = true;
-
-            $http.post('ReportingController/GetReportDetails/' + $scope.togglingTenant, Details)
-            .then(function (response) {
-                if (!vmReport.showrefnum) {
-                    vmReport.serviceGrid.data = response.data;
-                }
-                columnToggle();
-                vmReport.Busy = false;
-            });
-        }
-        else {
-            vmReport.Busy = true;
-            $http.get('ReportingController/GetReportDetailsFilter/' + vmReport.FilterSection + '/' + $scope.togglingTenant)
-              .then(function (response) {
-                  if (!vmReport.showrefnum) {
-                      vmReport.serviceGrid.data = response.data;
-                  }
-                  columnToggle();
-                  vmReport.Busy = false;
-              });
-        }
-
-    }
-
-    vmReport.switchGridInfo = switchGridInfo;
-    function switchGridInfo(val)
-    {
-        if (val == 'RF') {
-            $scope.togglingTenant = 'RF';
-            loadRFOrder();
-        } else if (val == '') {
-            $scope.togglingTenant = $scope.Tenant;
-            search();
-            columnToggle();
-        }
-    }
-
-    $http.get('Security/GetTenant')
-      .then(function (response) {
-
-          $scope.Tenant = response.data;
-          $scope.togglingTenant = $scope.Tenant;
-          columnToggle();
-      });
-
-    function columnToggle()
-    {
-        if ($scope.togglingTenant != '') {
-            //Code Hide/Display Tenant GridColumn based on Tenant Conditions
-            var pos = $scope.vmReport.serviceGrid.columnDefs.map(function (e) { return e.name; }).indexOf('Tenant');
-            var posAT = $scope.vmReport.serviceGrid.columnDefs.map(function (e) { return e.name; }).indexOf('Request Action Type');
-            var posIRN = $scope.vmReport.serviceGrid.columnDefs.map(function (e) { return e.name; }).indexOf('Internal Reference Number');
-
-            if ($scope.togglingTenant != 'RF') {
-                $scope.vmReport.serviceGrid.columnDefs[pos].visible = true;
-                $scope.vmReport.serviceGrid.columnDefs[posAT].visible = false;
-                $scope.vmReport.serviceGrid.columnDefs[posIRN].visible = true;
-            }
-            else {
-                $scope.vmReport.serviceGrid.columnDefs[pos].visible = false;
-                $scope.vmReport.serviceGrid.columnDefs[posAT].visible = true;
-                $scope.vmReport.serviceGrid.columnDefs[posIRN].visible = false;
-            }
-        }
-    }
-
-    $scope.expandAll = function () {
-        vmReport.serviceGrid.gridApi.treeBase.expandAllRows();
-    };
-
-    $scope.close = function (result) {
-        close(result, 500); // close, but give 500ms for bootstrap to animate
-    };
-
-    $scope.closemodal = function (result) {
-        close(result, 500); // close, but give 500ms for bootstrap to animate
-    };
-
-    $scope.toggleRow = function (rowNum) {
-        vmReport.serviceGrid.gridApi.treeBase.toggleRowTreeState($scope.gridApi.grid.renderContainers.body.visibleRowCache[rowNum]);
-    };
-
-    vmReport.showrefnum = false;
-    vmReport.showdates = true;
-    $scope.mynumStyle = { color: '' };
-    $scope.mydtStyle = { color: '#007acc' };
-    $scope.ShowHide = function (item) {
-        if (item == 'showdates') {
-            vmReport.showdates = true;
-            vmReport.showrefnum = false;
-            $scope.mynumStyle = { color: '' };
-            $scope.mydtStyle = { color: '#007acc' };
-        }
-        else if (item == 'showrefnum') {
-            vmReport.showrefnum = true;
-            vmReport.showdates = false;
-            $scope.mydtStyle = { color: '' };
-            $scope.mynumStyle = { color: '#007acc' };
-        }
-    }
-}
-
-psReportingRowEditor.$inject = ['$http', '$rootScope', 'modalProvider'];
-function psReportingRowEditor($http, $rootScope, modalProvider) {
-    
-    var service = {};
-    service.editReportRow = editReportRow;
-
-    function editReportRow(grid, row) {
-        modalProvider.openPopupModal(row.entity.ServiceRequestId);
-    }
-
-    return service;
-}
-
-
-
-
+               
