@@ -1,57 +1,66 @@
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-interface BEQExceptionResponse {
-  // Define the structure according to your actual data
-}
+const Dashboard = () => {
+  const [beqExceptions, setBeqExceptions] = useState([]);
+  const [teqExceptions, setTeqExceptions] = useState([]);
+  const [graphicalTeqExceptions, setGraphicalTeqExceptions] = useState([]);
+  const [graphicalBeqExceptions, setGraphicalBeqExceptions] = useState([]);
+  const baseURL = ''; // Set your base URL here
 
-interface TEQExceptionResponse {
-  // Define the structure according to your actual data
-}
+  useEffect(() => {
+    loadBEQExceptions();
+    loadTEQExceptions();
+    loadGraphicalTEQException();
+    loadGraphicalBEQException();
+  }, []);
 
-interface GraphicalTEQExceptionResponse {
-  // Define the structure according to your actual data
-}
-
-interface GraphicalBEQExceptionResponse {
-  // Define the structure according to your actual data
-}
-
-export class DashboardService {
-  private baseURL: string = ''; // Set your base URL here
-
-  public loadBEQExceptions(): Promise<BEQExceptionResponse> {
-    return axios.get(`${this.baseURL}/Dashboard/BEQException/`, {
+  const loadBEQExceptions = async () => {
+    const response = await axios.get(`${baseURL}/Dashboard/BEQException/`, {
       headers: {
         'Content-Type': 'application/json',
         // Any other headers
       },
-    }).then(response => response.data);
-  }
+    });
+    setBeqExceptions(response.data);
+  };
 
-  public loadTEQExceptions(): Promise<TEQExceptionResponse> {
-    return axios.get(`${this.baseURL}/Dashboard/TEQException/`, {
+  const loadTEQExceptions = async () => {
+    const response = await axios.get(`${baseURL}/Dashboard/TEQException/`, {
       headers: {
         'Content-Type': 'application/json',
         // Any other headers
       },
-    }).then(response => response.data);
-  }
+    });
+    setTeqExceptions(response.data);
+  };
 
-  public loadGraphicalTEQException(): Promise<GraphicalTEQExceptionResponse> {
-    return axios.get(`${this.baseURL}/Dashboard/GraphicalTEQException/`, {
+  const loadGraphicalTEQException = async () => {
+    const response = await axios.get(`${baseURL}/Dashboard/GraphicalTEQException/`, {
       headers: {
         'Content-Type': 'application/json',
         // Any other headers
       },
-    }).then(response => response.data);
-  }
+    });
+    setGraphicalTeqExceptions(response.data);
+  };
 
-  public loadGraphicalBEQException(): Promise<GraphicalBEQExceptionResponse> {
-    return axios.get(`${this.baseURL}/Dashboard/GraphicalBEQException/`, {
+  const loadGraphicalBEQException = async () => {
+    const response = await axios.get(`${baseURL}/Dashboard/GraphicalBEQException/`, {
       headers: {
         'Content-Type': 'application/json',
         // Any other headers
       },
-    }).then(response => response.data);
-  }
-}
+    });
+    setGraphicalBeqExceptions(response.data);
+  };
+
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      {/* Render your data here */}
+    </div>
+  );
+};
+
+export default Dashboard;
