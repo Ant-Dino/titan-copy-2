@@ -1,10 +1,10 @@
- 
+
 "use strict";
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import ReportingService from './ReportingService'; // Import the React service component
 
 function PsReportingComponent({ initialTenant = '', userInfo }) {
     const [orderToInvalidate, setOrderToInvalidate] = useState([]);
@@ -53,7 +53,7 @@ function PsReportingComponent({ initialTenant = '', userInfo }) {
     const inValidateProcess = async () => {
         console.log("entered invalidate process method.");
         try {
-            const response = await axios.post('ReportingController/InvalidateOrderData', orderToInvalidate);
+            const response = await ReportingService.invalidateOrderData(orderToInvalidate); // Use ReportingService instead
             setOrderToInvalidate([]);
 
             if (response.data.length > 0) {
