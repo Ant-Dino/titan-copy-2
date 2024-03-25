@@ -1,9 +1,6 @@
-﻿"use strict";
-
 angular.module('psDashboard').controller('psDashboardController', ['$scope', '$rootScope', '$http', '$interval', '$cookies', 'UserInfo',
 function ($scope, $rootScope, $http, $interval, $cookies, UserInfo) {
     var DashBoardCtrl = this;
-
     DashBoardCtrl.getCurrentUser = function () {
         UserInfo.getUser().then(function (response) {
             $rootScope.$broadcast('getUser', response);
@@ -13,87 +10,64 @@ function ($scope, $rootScope, $http, $interval, $cookies, UserInfo) {
             $scope.canmanageaccessreq = response.CanAccessReq;
             DashBoardCtrl.LoadBEQExceptions();
             DashBoardCtrl.LoadTEQExceptions();
-
-
         }, function (error) {
-
         }); 
     };
-
     var hasAccess = false;
     var isUser = true;
     var hasBEQAccess = false;
     var hasTEQAccess = false;
-
     if ($scope.canmanagebeq) {
         hasBEQAccess = true;
     }
-
     if ($scope.canmanageteq) {
         hasTEQAccess = true;
     }
-
     if ($scope.activityright === 'Admin' || $scope.activityright === 'SuperAdmin') {
         hasAccess = true;
     }
-
     if ($scope.activityright !== 'Admin' && $scope.activityright !== 'SuperAdmin' && $scope.activityright !== 'User') {
         isUser = false;
     }
-
     $scope.hasAccess = hasAccess;
     $scope.hasBEQAccess = hasBEQAccess;
     $scope.hasTEQAccess = hasTEQAccess;
-
     DashBoardCtrl.LoadBEQExceptions = function () {
         $http.get('Dashboard/BEQException/')
            .success(function (data) {
                DashBoardCtrl.BEQSummaryList = data;
            });
     };
-
     DashBoardCtrl.LoadTEQExceptions = function () {
         $http.get('Dashboard/TEQException/')
            .success(function (data) {
                DashBoardCtrl.TEQSummaryList = data;
            });
     };
-
     //$interval(function () {
     //    DashBoardCtrl.LoadTEQExceptions();
     //}.bind(this), 900000);
-
     //$interval(function () {
     //    DashBoardCtrl.LoadBEQExceptions();
     //}.bind(this), 900000);
-
 }]);
-
-
 angular.module('psDashboard').controller("TEQLineCtrl", ['$rootScope', '$scope', '$http', '$timeout', '$interval', function ($rootScope, $scope, $http, $timeout, $interval) {
     var teqLnchartCtrl = this;
     teqLnchartCtrl.TEQlineChartData = "";
-
     $scope.$on('getUser', function (evt, response) {
         $scope.currentuser = response.UserName;
         $scope.activityright = response.ActivityRight;
-
         teqLnchartCtrl.LoadTEQException();
-
         $scope.canmanageteq = response.CanManageTEQ;
         $scope.canmanagebeq = response.CanManageBEQ;
-
     });
-
     //$interval(function () {
     //    teqLnchartCtrl.LoadTEQException();
     //}.bind(this), 900000);
-
     teqLnchartCtrl.GraphData = [];
     teqLnchartCtrl.labels = [], teqLnchartCtrl.data1 = [], teqLnchartCtrl.data2 = [];
     teqLnchartCtrl.data3 = []; teqLnchartCtrl.data4 = [];
     teqLnchartCtrl.data5 = [];
-
     teqLnchartCtrl.LoadTEQException = function () {
         $http.get('Dashboard/GraphicalTEQException/')
         .success(function (data) {
@@ -102,7 +76,6 @@ angular.module('psDashboard').controller("TEQLineCtrl", ['$rootScope', '$scope',
             teqLnchartCtrl.data1 = [], teqLnchartCtrl.data2 = [];
             teqLnchartCtrl.data3 = []; teqLnchartCtrl.data4 = [];
             teqLnchartCtrl.GraphData = data;
-
             for (var i = 0; i < teqLnchartCtrl.GraphData.length; i++) {
                 teqLnchartCtrl.labels1.push(teqLnchartCtrl.GraphData[i].Hour);
                 teqLnchartCtrl.data1.push(teqLnchartCtrl.GraphData[i].NewCount);
@@ -111,7 +84,6 @@ angular.module('psDashboard').controller("TEQLineCtrl", ['$rootScope', '$scope',
                 teqLnchartCtrl.data4.push(teqLnchartCtrl.GraphData[i].ArchiveCount);
                 teqLnchartCtrl.data5.push(teqLnchartCtrl.GraphData[i].QueueCount);
             }
-
             teqLnchartCtrl.labels = teqLnchartCtrl.labels1;
             teqLnchartCtrl.data = [
                 teqLnchartCtrl.data1,
@@ -143,7 +115,6 @@ angular.module('psDashboard').controller("TEQLineCtrl", ['$rootScope', '$scope',
                     }]
                 }
             };
-
             teqLnchartCtrl.datasetOverride = [{
                 label: "New",
                 borderWidth: 1,
@@ -162,7 +133,6 @@ angular.module('psDashboard').controller("TEQLineCtrl", ['$rootScope', '$scope',
                 type: 'bar',
                 backgroundColor: 'rgba(234,241,245, 0.9)',
                 borderColor: 'rgba(234,241,245, 0.9)'
-
             }, {
                 label: "Resolved",
                 borderWidth: 2,
@@ -173,41 +143,28 @@ angular.module('psDashboard').controller("TEQLineCtrl", ['$rootScope', '$scope',
                 pointHoverBackgroundColor: 'rgba(213,230,218, 0.9)',
                 borderColor: 'rgba(213,230,218, 0.9)'                        
             }];
-
             teqLnchartCtrl.onClick = function (points, evt) {
                 console.log(points, evt);
             };
         });
     }
-
 }]);
-
-
 angular.module('psDashboard').controller("BEQLineCtrl", ['$rootScope', '$scope', '$http', '$timeout', '$interval', function ($rootScope, $scope, $http, $timeout, $interval) {
-
     var LnCtrl = this;
     LnCtrl.lineChartData = "";
-
     $scope.$on('getUser', function (evt, response) {
         $scope.currentuser = response.UserName;
         $scope.activityright = response.ActivityRight;
-
         LnCtrl.LoadException();
-
         $scope.canmanageteq = response.CanManageTEQ;
         $scope.canmanagebeq = response.CanManageBEQ;
-
     });
-
     //$interval(function () {
     //    LnCtrl.LoadException();
     //}.bind(this), 900000);
-
     LnCtrl.GraphData = [];
     LnCtrl.labels1 = [], LnCtrl.data1 = [], LnCtrl.data2 = [], LnCtrl.data3 = [], LnCtrl.data4 = [], LnCtrl.data5 = [];
-
     $rootScope.$on('BEQExceptionGraph', function () { LnCtrl.LoadException(); });
-
     LnCtrl.LoadException = function () {
         $http.get('Dashboard/GraphicalBEQException/')
         .success(function (data) {
@@ -217,7 +174,6 @@ angular.module('psDashboard').controller("BEQLineCtrl", ['$rootScope', '$scope',
             LnCtrl.data3 = []; LnCtrl.data4 = [];
             LnCtrl.data5 = [];
             LnCtrl.GraphData = data;
-
             for (var i = 0; i < LnCtrl.GraphData.length; i++) {
                 LnCtrl.labels1.push(LnCtrl.GraphData[i].Hour);
                 LnCtrl.data1.push(LnCtrl.GraphData[i].NewCount);
@@ -226,9 +182,7 @@ angular.module('psDashboard').controller("BEQLineCtrl", ['$rootScope', '$scope',
                 LnCtrl.data4.push(LnCtrl.GraphData[i].ArchiveCount);
                 LnCtrl.data5.push(LnCtrl.GraphData[i].QueueCount);
             }
-
             LnCtrl.labels = LnCtrl.labels1;
-
             LnCtrl.data = [
              LnCtrl.data1,
                LnCtrl.data2,
@@ -259,7 +213,6 @@ angular.module('psDashboard').controller("BEQLineCtrl", ['$rootScope', '$scope',
                     }]
                 }
             };
-
             LnCtrl.datasetOverride = [
                      {
                          label: "New",
@@ -275,7 +228,6 @@ angular.module('psDashboard').controller("BEQLineCtrl", ['$rootScope', '$scope',
                          backgroundColor: 'rgba(194,214,235, 0.9)',
                          borderColor: 'rgba(194,214,235, 0.9)'
                      },
-
                      {
                          label: "Hold",
                          borderWidth: 1,
@@ -293,13 +245,10 @@ angular.module('psDashboard').controller("BEQLineCtrl", ['$rootScope', '$scope',
                          pointHoverBackgroundColor: 'rgba(213,230,218, 0.9)',
                          borderColor: 'rgba(213,230,218, 0.9)'
                      }
-
             ];
-
             LnCtrl.onClick = function (points, evt) {
                 console.log(points, evt);
             };
         });
     }
-
 }]);
