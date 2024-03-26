@@ -1,0 +1,39 @@
+import axios from 'axios';
+
+interface AuditDetails {
+  search?: string;
+  Fromdate: string;
+  ThroughDate: string;
+}
+
+interface AuditDetailsFilter {
+  filterSection: string;
+}
+
+class PsAuditingService {
+  private baseURL: string = '';
+
+  constructor() {
+    this.baseURL = 'http://yourapi.com/'; // Replace with your actual base URL
+  }
+
+  getAuditDetails(details: AuditDetails) {
+    return axios.post(`${this.baseURL}api/audit/GetAuditDetails/`, details, {
+      headers: {
+        'Content-Type': 'application/json',
+        // Any other headers
+      },
+    });
+  }
+
+  getAuditDetailsFilter(filterSection: string) {
+    return axios.get(`${this.baseURL}AuditController/GetAuditDetailsFilter/${filterSection}`, {
+      headers: {
+        'Accept': 'application/json',
+        // Any other headers
+      },
+    });
+  }
+}
+
+export default new PsAuditingService();
