@@ -1,57 +1,57 @@
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-interface BEQExceptionResponse {
-  // Define the structure according to the actual data received
-}
+const Dashboard = () => {
+  const [beqExceptions, setBeqExceptions] = useState([]);
+  const [teqExceptions, setTeqExceptions] = useState([]);
+  const [graphicalTeqExceptions, setGraphicalTeqExceptions] = useState([]);
+  const [graphicalBeqExceptions, setGraphicalBeqExceptions] = useState([]);
+  const baseURL = ''; // Set the base URL according to the environment
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      const beqExceptionResponse = await axios.get(`${baseURL}/Dashboard/BEQException/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other headers required by the API
+        },
+      });
 
-interface TEQExceptionResponse {
-  // Define the structure according to the actual data received
-}
+      const teqExceptionResponse = await axios.get(`${baseURL}/Dashboard/TEQException/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other headers required by the API
+        },
+      });
 
-interface GraphicalTEQExceptionResponse {
-  // Define the structure according to the actual data received
-}
+      const graphicalTeqExceptionResponse = await axios.get(`${baseURL}/Dashboard/GraphicalTEQException/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other headers required by the API
+        },
+      });
 
-interface GraphicalBEQExceptionResponse {
-  // Define the structure according to the actual data received
-}
+      const graphicalBeqExceptionResponse = await axios.get(`${baseURL}/Dashboard/GraphicalBEQException/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other headers required by the API
+        },
+      });
 
-export class PsDashboardService {
-  private baseURL: string = ''; // Set the base URL according to the environment
+      setBeqExceptions(beqExceptionResponse.data);
+      setTeqExceptions(teqExceptionResponse.data);
+      setGraphicalTeqExceptions(graphicalTeqExceptionResponse.data);
+      setGraphicalBeqExceptions(graphicalBeqExceptionResponse.data);
+    };
 
-  loadBEQExceptions(): Promise<BEQExceptionResponse> {
-    return axios.get(`${this.baseURL}/Dashboard/BEQException/`, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any other headers required by the API
-      },
-    }).then(response => response.data);
-  }
+    fetchData();
+  }, [baseURL]);
 
-  loadTEQExceptions(): Promise<TEQExceptionResponse> {
-    return axios.get(`${this.baseURL}/Dashboard/TEQException/`, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any other headers required by the API
-      },
-    }).then(response => response.data);
-  }
+  return (
+    <div>
+      {/* Render dashboard data */}
+    </div>
+  );
+};
 
-  loadGraphicalTEQException(): Promise<GraphicalTEQExceptionResponse> {
-    return axios.get(`${this.baseURL}/Dashboard/GraphicalTEQException/`, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any other headers required by the API
-      },
-    }).then(response => response.data);
-  }
-
-  loadGraphicalBEQException(): Promise<GraphicalBEQExceptionResponse> {
-    return axios.get(`${this.baseURL}/Dashboard/GraphicalBEQException/`, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any other headers required by the API
-      },
-    }).then(response => response.data);
-  }
-}
+export default Dashboard;
