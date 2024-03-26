@@ -1,56 +1,40 @@
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import PsReportingService from './PsReportingService'; // Assuming PsReportingService is converted if needed and exported properly
 
-interface InvalidateOrderDataRequest {
-  // Define the structure according to the $scope.orderToInvalidate in the controller
-}
+const OrderManagement = () => {
+  // Converted $scope and $rootScope variables using useState
+  const [orderToInvalidate, setOrderToInvalidate] = useState([]);
+  const [userName, setUserName] = useState(''); // Hypothetical conversion of a $rootScope variable
 
-interface GetReportDetailsRequest {
-  Fromdate: string;
-  ThroughDate: string;
-}
+  // Example conversion of an AngularJS function
+  const invalidateOrder = async () => {
+    const psReportingService = new PsReportingService();
+    try {
+      const response = await psReportingService.invalidateOrderData(orderToInvalidate);
+      console.log('Order invalidated:', response);
+    } catch (error) {
+      console.error('Failed to invalidate order:', error);
+    }
+  };
 
-interface GetReportDetailsbyReferenceFilterRequest {
-  ReferenceNoType: string;
-  ReferenceNo: string;
-}
+  // Converted dependency (Not exactly necessary to convert but shown for demonstration)
+  // PsReportingService is used as shown in the invalidateOrder function above
 
-class PsReportingService {
-  private baseURL: string = ''; // Set the base URL according to your environment
+  // Example usage in React's useEffect to replace AngularJS's controller initial load logic
+  useEffect(() => {
+    setUserName('John Doe'); // Hypothetical initialization code
+    // You could also place API calls or other initialization logic here
+  }, []); // The empty array means this effect runs once on component mount
 
-  invalidateOrderData(orderData: InvalidateOrderDataRequest[]) {
-    return axios.post(`${this.baseURL}/ReportingController/InvalidateOrderData`, orderData, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Any other headers
-      },
-    });
-  }
+  return (
+    <div>
+      {/* Example UI that may use the state and functions above */}
+      <h1>Welcome {userName}</h1>
+      {/* Other UI elements and event handlers */}
+      <button onClick={invalidateOrder}>Invalidate Order</button>
+    </div>
+  );
+};
 
-  getReportDetails(tenant: string, details: GetReportDetailsRequest) {
-    return axios.post(`${this.baseURL}/ReportingController/GetReportDetails/${tenant}`, details, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Any other headers
-      },
-    });
-  }
-
-  getReportDetailsFilter(filterSection: string, tenant: string) {
-    return axios.get(`${this.baseURL}/ReportingController/GetReportDetailsFilter/${filterSection}/${tenant}`, {
-      headers: {
-        // Any headers if needed
-      },
-    });
-  }
-
-  getReportDetailsbyReferenceFilter(tenant: string, filterDetails: GetReportDetailsbyReferenceFilterRequest) {
-    return axios.post(`${this.baseURL}/ReportingController/GetReportDetailsbyReferenceFilter/${tenant}`, filterDetails, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Any other headers
-      },
-    });
-  }
-}
-
-export default PsReportingService;
+export default OrderManagement;
