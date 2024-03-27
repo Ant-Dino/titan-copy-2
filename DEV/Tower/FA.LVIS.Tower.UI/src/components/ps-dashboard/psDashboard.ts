@@ -1,7 +1,10 @@
+ 
 "use strict";
 
 import React, { useState, useEffect } from 'react';
 import DashboardService from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psDashboard.service';
+import { connect } from 'react-redux';
+import store from 'DEV/Tower/FA.LVIS.Tower.UI/src/components/ps-dashboard/modules/psDashboardStore.js';
 
 // Conversion of DashboardController to a functional component
 const Dashboard = () => {
