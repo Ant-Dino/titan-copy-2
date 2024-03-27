@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import DashboardService from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psDashboard.service.ts';
 // Assuming the UserInfo, and other necessary services are already transformed to their React equivalents or via direct API calls
 const DashboardController = () => {
   const [activityRight, setActivityRight] = useState('');
@@ -29,12 +29,12 @@ const DashboardController = () => {
     }
   };
   const loadBEQExceptions = async () => {
-    const response = await axios.get('Dashboard/BEQException/');
-    setBEQSummaryList(response.data);
+    const response = await DashboardService.loadBEQExceptions();
+    setBEQSummaryList(response);
   };
   const loadTEQExceptions = async () => {
-    const response = await axios.get('Dashboard/TEQException/');
-    setTEQSummaryList(response.data);
+    const response = await DashboardService.loadTEQExceptions();
+    setTEQSummaryList(response);
   };
   // Additional functions like LoadException for TEQLineCtrl and BEQLineCtrl can also be moved to this component or to their own hooks/components
   return (
