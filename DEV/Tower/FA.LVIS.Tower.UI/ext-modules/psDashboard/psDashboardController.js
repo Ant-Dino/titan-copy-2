@@ -1,7 +1,7 @@
 "use strict";
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // assuming axios is used for HTTP requests
+import DashboardService from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psDashboard.service';
 
 // Conversion of DashboardController to a functional component
 const Dashboard = () => {
@@ -20,7 +20,7 @@ const Dashboard = () => {
 
     const getCurrentUser = () => {
         // Assuming UserInfo.getUser returns a promise similar to how axios would
-        axios.get('/user/info').then((response) => {
+        DashboardService.getCurrentUser().then((response) => {
             const responseUserData = response.data;
             setCurrentUser(responseUserData);
             setHasAccess(responseUserData.activityRight === 'Admin' || responseUserData.activityRight === 'SuperAdmin');
@@ -35,7 +35,7 @@ const Dashboard = () => {
     };
 
     const loadBEQExceptions = () => {
-        axios.get('Dashboard/BEQException/').then((data) => {
+        DashboardService.loadBEQExceptions().then((data) => {
             setBEQSummaryList(data.data);
         }).catch((error) => {
             console.error("Error fetching BEQ exceptions:", error);
@@ -43,7 +43,7 @@ const Dashboard = () => {
     };
 
     const loadTEQExceptions = () => {
-        axios.get('Dashboard/TEQException/').then((data) => {
+        DashboardService.loadTEQExceptions().then((data) => {
             setTEQSummaryList(data.data);
         }).catch((error) => {
             console.error("Error fetching TEQ exceptions:", error);
@@ -58,6 +58,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-// TEQLineCtrl and BEQLineCtrl would follow a similar transformation process,
-// creating functional components using useState and useEffect as shown above.
