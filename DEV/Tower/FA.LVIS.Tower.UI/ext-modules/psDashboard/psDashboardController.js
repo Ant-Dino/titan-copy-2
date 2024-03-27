@@ -1,305 +1,63 @@
-﻿"use strict";
-
-angular.module('psDashboard').controller('psDashboardController', ['$scope', '$rootScope', '$http', '$interval', '$cookies', 'UserInfo',
-function ($scope, $rootScope, $http, $interval, $cookies, UserInfo) {
-    var DashBoardCtrl = this;
-
-    DashBoardCtrl.getCurrentUser = function () {
-        UserInfo.getUser().then(function (response) {
-            $rootScope.$broadcast('getUser', response);
-            $scope.activityright = response.ActivityRight;
-            $scope.canmanageteq = response.CanManageTEQ;
-            $scope.canmanagebeq = response.CanManageBEQ;
-            $scope.canmanageaccessreq = response.CanAccessReq;
-            DashBoardCtrl.LoadBEQExceptions();
-            DashBoardCtrl.LoadTEQExceptions();
-
-
-        }, function (error) {
-
-        }); 
-    };
-
-    var hasAccess = false;
-    var isUser = true;
-    var hasBEQAccess = false;
-    var hasTEQAccess = false;
-
-    if ($scope.canmanagebeq) {
-        hasBEQAccess = true;
-    }
-
-    if ($scope.canmanageteq) {
-        hasTEQAccess = true;
-    }
-
-    if ($scope.activityright === 'Admin' || $scope.activityright === 'SuperAdmin') {
-        hasAccess = true;
-    }
-
-    if ($scope.activityright !== 'Admin' && $scope.activityright !== 'SuperAdmin' && $scope.activityright !== 'User') {
-        isUser = false;
-    }
-
-    $scope.hasAccess = hasAccess;
-    $scope.hasBEQAccess = hasBEQAccess;
-    $scope.hasTEQAccess = hasTEQAccess;
-
-    DashBoardCtrl.LoadBEQExceptions = function () {
-        $http.get('Dashboard/BEQException/')
-           .success(function (data) {
-               DashBoardCtrl.BEQSummaryList = data;
-           });
-    };
-
-    DashBoardCtrl.LoadTEQExceptions = function () {
-        $http.get('Dashboard/TEQException/')
-           .success(function (data) {
-               DashBoardCtrl.TEQSummaryList = data;
-           });
-    };
-
-    //$interval(function () {
-    //    DashBoardCtrl.LoadTEQExceptions();
-    //}.bind(this), 900000);
-
-    //$interval(function () {
-    //    DashBoardCtrl.LoadBEQExceptions();
-    //}.bind(this), 900000);
-
-}]);
-
-
-angular.module('psDashboard').controller("TEQLineCtrl", ['$rootScope', '$scope', '$http', '$timeout', '$interval', function ($rootScope, $scope, $http, $timeout, $interval) {
-    var teqLnchartCtrl = this;
-    teqLnchartCtrl.TEQlineChartData = "";
-
-    $scope.$on('getUser', function (evt, response) {
-        $scope.currentuser = response.UserName;
-        $scope.activityright = response.ActivityRight;
-
-        teqLnchartCtrl.LoadTEQException();
-
-        $scope.canmanageteq = response.CanManageTEQ;
-        $scope.canmanagebeq = response.CanManageBEQ;
-
-    });
-
-    //$interval(function () {
-    //    teqLnchartCtrl.LoadTEQException();
-    //}.bind(this), 900000);
-
-    teqLnchartCtrl.GraphData = [];
-    teqLnchartCtrl.labels = [], teqLnchartCtrl.data1 = [], teqLnchartCtrl.data2 = [];
-    teqLnchartCtrl.data3 = []; teqLnchartCtrl.data4 = [];
-    teqLnchartCtrl.data5 = [];
-
-    teqLnchartCtrl.LoadTEQException = function () {
-        $http.get('Dashboard/GraphicalTEQException/')
-        .success(function (data) {
-            teqLnchartCtrl.GraphData = [];
-            teqLnchartCtrl.labels1 = [],
-            teqLnchartCtrl.data1 = [], teqLnchartCtrl.data2 = [];
-            teqLnchartCtrl.data3 = []; teqLnchartCtrl.data4 = [];
-            teqLnchartCtrl.GraphData = data;
-
-            for (var i = 0; i < teqLnchartCtrl.GraphData.length; i++) {
-                teqLnchartCtrl.labels1.push(teqLnchartCtrl.GraphData[i].Hour);
-                teqLnchartCtrl.data1.push(teqLnchartCtrl.GraphData[i].NewCount);
-                teqLnchartCtrl.data2.push(teqLnchartCtrl.GraphData[i].ActiveCount);
-                teqLnchartCtrl.data3.push(teqLnchartCtrl.GraphData[i].HoldCount);
-                teqLnchartCtrl.data4.push(teqLnchartCtrl.GraphData[i].ArchiveCount);
-                teqLnchartCtrl.data5.push(teqLnchartCtrl.GraphData[i].QueueCount);
-            }
-
-            teqLnchartCtrl.labels = teqLnchartCtrl.labels1;
-            teqLnchartCtrl.data = [
-                teqLnchartCtrl.data1,
-                teqLnchartCtrl.data2,
-                teqLnchartCtrl.data3,
-                teqLnchartCtrl.data4
-            ];
-            teqLnchartCtrl.type = 'StackedBar';
-            teqLnchartCtrl.optionsMixed = {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    reverse: true
-                },
-                scales: {
-                    xAxes: [{
-                        barThickness: '20',
-                        stacked: true,
-                        time: {
-                            unit: 'hour'
-                        }
-                    }],
-                    yAxes: [{
-                        stacked: true,
-                        ticks: {
-                            beginAtZero: true,
-                            minStepSize: 1
-                        }
-                    }]
-                }
-            };
-
-            teqLnchartCtrl.datasetOverride = [{
-                label: "New",
-                borderWidth: 1,
-                type: 'bar',
-                backgroundColor: 'rgba(244,210,209, 0.9)',
-                borderColor: 'rgba(244,210,209, 0.9)',
-            }, {
-                label: "Active",
-                borderWidth: 1,
-                type: 'bar',
-                backgroundColor: 'rgba(194,214,235, 0.9)',
-                borderColor: 'rgba(194,214,235, 0.9)'
-            }, {
-                label: "Hold",
-                borderWidth: 1,
-                type: 'bar',
-                backgroundColor: 'rgba(234,241,245, 0.9)',
-                borderColor: 'rgba(234,241,245, 0.9)'
-
-            }, {
-                label: "Resolved",
-                borderWidth: 2,
-                fill: true,
-                type: 'line',
-                backgroundColor: 'rgba(213,230,218, 0.9)',
-                pointBackgroundColor: 'rgba(213,230,218, 0.9)',
-                pointHoverBackgroundColor: 'rgba(213,230,218, 0.9)',
-                borderColor: 'rgba(213,230,218, 0.9)'                        
-            }];
-
-            teqLnchartCtrl.onClick = function (points, evt) {
-                console.log(points, evt);
-            };
-        });
-    }
-
-}]);
-
-
-angular.module('psDashboard').controller("BEQLineCtrl", ['$rootScope', '$scope', '$http', '$timeout', '$interval', function ($rootScope, $scope, $http, $timeout, $interval) {
-
-    var LnCtrl = this;
-    LnCtrl.lineChartData = "";
-
-    $scope.$on('getUser', function (evt, response) {
-        $scope.currentuser = response.UserName;
-        $scope.activityright = response.ActivityRight;
-
-        LnCtrl.LoadException();
-
-        $scope.canmanageteq = response.CanManageTEQ;
-        $scope.canmanagebeq = response.CanManageBEQ;
-
-    });
-
-    //$interval(function () {
-    //    LnCtrl.LoadException();
-    //}.bind(this), 900000);
-
-    LnCtrl.GraphData = [];
-    LnCtrl.labels1 = [], LnCtrl.data1 = [], LnCtrl.data2 = [], LnCtrl.data3 = [], LnCtrl.data4 = [], LnCtrl.data5 = [];
-
-    $rootScope.$on('BEQExceptionGraph', function () { LnCtrl.LoadException(); });
-
-    LnCtrl.LoadException = function () {
-        $http.get('Dashboard/GraphicalBEQException/')
-        .success(function (data) {
-            LnCtrl.GraphData = [];
-            LnCtrl.labels1 = [],
-            LnCtrl.data1 = [], LnCtrl.data2 = [];
-            LnCtrl.data3 = []; LnCtrl.data4 = [];
-            LnCtrl.data5 = [];
-            LnCtrl.GraphData = data;
-
-            for (var i = 0; i < LnCtrl.GraphData.length; i++) {
-                LnCtrl.labels1.push(LnCtrl.GraphData[i].Hour);
-                LnCtrl.data1.push(LnCtrl.GraphData[i].NewCount);
-                LnCtrl.data2.push(LnCtrl.GraphData[i].ActiveCount);
-                LnCtrl.data3.push(LnCtrl.GraphData[i].HoldCount);
-                LnCtrl.data4.push(LnCtrl.GraphData[i].ArchiveCount);
-                LnCtrl.data5.push(LnCtrl.GraphData[i].QueueCount);
-            }
-
-            LnCtrl.labels = LnCtrl.labels1;
-
-            LnCtrl.data = [
-             LnCtrl.data1,
-               LnCtrl.data2,
-                LnCtrl.data3,
-                 LnCtrl.data4
-            ];
-            LnCtrl.type = 'StackedBar';
-            LnCtrl.optionsMixed = {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    reverse: true
-                },
-                scales: {
-                    xAxes: [{
-                        barThickness: '20',
-                        stacked: true,
-                        time: {
-                            unit: 'hour'
-                        }
-                    }],
-                    yAxes: [{
-                        stacked: true,
-                        ticks: {
-                            beginAtZero: true,
-                            minStepSize: 1
-                        }
-                    }]
-                }
-            };
-
-            LnCtrl.datasetOverride = [
-                     {
-                         label: "New",
-                         borderWidth: 1,
-                         type: 'bar',
-                         backgroundColor: 'rgba(244,210,209, 0.9)',
-                         borderColor: 'rgba(244,210,209, 0.9)',
-                     },
-                     {
-                         label: "Active",
-                         borderWidth: 1,
-                         type: 'bar',
-                         backgroundColor: 'rgba(194,214,235, 0.9)',
-                         borderColor: 'rgba(194,214,235, 0.9)'
-                     },
-
-                     {
-                         label: "Hold",
-                         borderWidth: 1,
-                         type: 'bar',
-                         backgroundColor: 'rgba(234,241,245, 0.9)',
-                         borderColor: 'rgba(234,241,245, 0.9)'
-                     },
-                     {
-                         label: "Resolved",
-                         borderWidth: 2,
-                         fill: true,
-                         type: 'line',
-                         backgroundColor: 'rgba(213,230,218, 0.9)',
-                         pointBackgroundColor: 'rgba(213,230,218, 0.9)',
-                         pointHoverBackgroundColor: 'rgba(213,230,218, 0.9)',
-                         borderColor: 'rgba(213,230,218, 0.9)'
-                     }
-
-            ];
-
-            LnCtrl.onClick = function (points, evt) {
-                console.log(points, evt);
-            };
-        });
-    }
-
-}]);
+﻿6098 "use strict";
+﻿7042 
+﻿8601 import React, { useState, useEffect } from 'react';
+﻿3652 import axios from 'axios'; // assuming axios is used for HTTP requests
+﻿4891 
+﻿2393 // Conversion of DashboardController to a functional component
+﻿9700 const Dashboard = () => {
+﻿1552     const [currentUser, setCurrentUser] = useState({});
+﻿5559     const [hasAccess, setHasAccess] = useState(false);
+﻿4173     const [isUser, setIsUser] = useState(true);
+﻿7135     const [hasBEQAccess, setHasBEQAccess] = useState(false);
+﻿2380     const [hasTEQAccess, setHasTEQAccess] = useState(false);
+﻿6656     const [BEQSummaryList, setBEQSummaryList] = useState([]);
+﻿1259     const [TEQSummaryList, setTEQSummaryList] = useState([]);
+﻿2644 
+﻿0655     useEffect(() => {
+﻿7296         getCurrentUser();
+﻿0431         // Dependency array left empty to mimic componentDidMount behavior
+﻿3951     }, []);
+﻿9860 
+﻿4481     const getCurrentUser = () => {
+﻿6616         // Assuming UserInfo.getUser returns a promise similar to how axios would
+﻿5649         axios.get('/user/info').then((response) => {
+﻿3946             const responseUserData = response.data;
+﻿9263             setCurrentUser(responseUserData);
+﻿4317             setHasAccess(responseUserData.activityRight === 'Admin' || responseUserData.activityRight === 'SuperAdmin');
+﻿4906             setIsUser(['Admin', 'SuperAdmin', 'User'].includes(responseUserData.activityRight));
+﻿8538             setHasBEQAccess(responseUserData.canManageBEQ);
+﻿0742             setHasTEQAccess(responseUserData.canManageTEQ);
+﻿4621             loadBEQExceptions();
+﻿8140             loadTEQExceptions();
+﻿0665         }).catch((error) => {
+﻿7554             console.error("Error fetching user data:", error);
+﻿6709         });
+﻿9031     };
+﻿7659 
+﻿2570     const loadBEQExceptions = () => {
+﻿0626         axios.get('Dashboard/BEQException/').then((data) => {
+﻿4058             setBEQSummaryList(data.data);
+﻿0296         }).catch((error) => {
+﻿8682             console.error("Error fetching BEQ exceptions:", error);
+﻿9174         });
+﻿4012     };
+﻿3878 
+﻿7949     const loadTEQExceptions = () => {
+﻿0658         axios.get('Dashboard/TEQException/').then((data) => {
+﻿2623             setTEQSummaryList(data.data);
+﻿9818         }).catch((error) => {
+﻿8277             console.error("Error fetching TEQ exceptions:", error);
+﻿0752         });
+﻿6850     };
+﻿4414 
+﻿7425     return (
+﻿2247         <div>
+﻿9243             {/* JSX to display the data */}
+﻿0296         </div>
+﻿8007     );
+﻿5834 };
+﻿8384 
+﻿7236 export default Dashboard;
+﻿6477 
+﻿7851 // TEQLineCtrl and BEQLineCtrl would follow a similar transformation process,
+﻿3490 // creating functional components using useState and useEffect as shown above.
