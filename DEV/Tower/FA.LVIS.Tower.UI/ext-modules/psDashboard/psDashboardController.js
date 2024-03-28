@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from './services/psDashboardService';
+import psDashboardService from './services/psDashboard.service';
 const Dashboard = () => {
     const [currentUser, setCurrentUser] = useState({});
     const [activityRight, setActivityRight] = useState('');
@@ -12,7 +12,7 @@ const Dashboard = () => {
     const [TEQSummaryList, setTEQSummaryList] = useState([]);
     const getCurrentUser = async () => {
         try {
-            const response = await axios.UserInfo.getUser();
+            const response = await psDashboardService.getUserInfo();
             setCurrentUser(response);
             setActivityRight(response.ActivityRight);
             setCanManageTEQ(response.CanManageTEQ);
@@ -29,7 +29,7 @@ const Dashboard = () => {
     };
     const loadBEQExceptions = async () => {
         try {
-            const { data } = await axios.get('/Dashboard/BEQException/');
+            const data = await psDashboardService.loadBEQExceptions();
             setBEQSummaryList(data);
         } catch (error) {
             console.error("Failed to load BEQ exceptions", error);
@@ -37,7 +37,7 @@ const Dashboard = () => {
     };
     const loadTEQExceptions = async () => {
         try {
-            const { data } = await axios.get('/Dashboard/TEQException/');
+            const data = await psDashboardService.loadTEQExceptions();
             setTEQSummaryList(data);
         } catch (error) {
             console.error("Failed to load TEQ exceptions", error);
