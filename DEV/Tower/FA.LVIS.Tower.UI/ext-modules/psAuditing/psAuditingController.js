@@ -1,11 +1,12 @@
+ 
 import React, { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import growl from 'growl-alert';
 import 'growl-alert/dist/growl-alert.css';
 import { useHistory } from 'react-router-dom';
+import PsAuditingService from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psAuditing.service.ts';
 const PsAuditingComponent = () => {
   const history = useHistory();
   const [activityRight, setActivityRight] = useState('');
@@ -20,8 +21,8 @@ const PsAuditingComponent = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userInfo = await axios.get('/api/user/info');
-        const { ActivityRight, CanManageTEQ, CanManageBEQ } = userInfo.data;
+        const userInfo = await PsAuditingService.fetchUserInfo();
+        const { ActivityRight, CanManageTEQ, CanManageBEQ } = userInfo;
         setActivityRight(ActivityRight);
         setHasAccess(ActivityRight === 'Admin' || ActivityRight === 'SuperAdmin');
       } catch (error) {
@@ -42,21 +43,19 @@ const PsAuditingComponent = () => {
       if (!fromDate || !throughDate) {
         return growl.error("Please enter a valid Start/End date");
       }
-
       validateDate();
       if (validateError) {
         return growl.error("End date cannot be earlier than the Start date");
       }
     }
-
     setBusy(true);
     try {
-      const response = await axios.post('/api/audit/GetAuditDetails', {
+      const response = await PsAuditingService.getAuditDetails({
         search: filterSection,
         Fromdate: fromDate.toString(),
         ThroughDate: throughDate.toString(),
       });
-      setAuditData(response.data);
+      setAuditData(response);
     } catch (error) {
       growl.error(error.response.data);
     } finally {
