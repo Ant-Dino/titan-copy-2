@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { UserInfoService } from './services/UserInfoService';
-import { BEQExceptionService, TEQExceptionService, GraphicalBEQExceptionService, GraphicalTEQExceptionService } from './services/DashboardServices';
+import { DashboardService as UserInfoService } from './services/psDashboard.service';
+import { DashboardService as BEQExceptionService } from './services/psDashboard.service';
+import { DashboardService as TEQExceptionService } from './services/psDashboard.service';
+import { DashboardService as GraphicalBEQExceptionService } from './services/psDashboard.service';
+import { DashboardService as GraphicalTEQExceptionService } from './services/psDashboard.service';
 const Dashboard = () => {
     const [currentUser, setCurrentUser] = useState({});
     const [activityRight, setActivityRight] = useState('');
@@ -19,15 +21,15 @@ const Dashboard = () => {
         getCurrentUser();
     }, []);
     const getCurrentUser = () => {
-        UserInfoService.getUser().then(response => {
-            setCurrentUser(response);
-            setActivityRight(response.ActivityRight);
-            setCanManageTEQ(response.CanManageTEQ);
-            setCanManageBEQ(response.CanManageBEQ);
-            setHasBEQAccess(response.CanManageBEQ);
-            setHasTEQAccess(response.CanManageTEQ);
+        UserInfoService.getCurrentUser().then(response => {
+            setCurrentUser(response.data);
+            setActivityRight(response.data.ActivityRight);
+            setCanManageTEQ(response.data.CanManageTEQ);
+            setCanManageBEQ(response.data.CanManageBEQ);
+            setHasBEQAccess(response.data.CanManageBEQ);
+            setHasTEQAccess(response.data.CanManageTEQ);
             const adminRights = ['Admin', 'SuperAdmin'];
-            setHasAccess(adminRights.includes(response.ActivityRight));
+            setHasAccess(adminRights.includes(response.data.ActivityRight));
             loadBEQExceptions();
             loadTEQExceptions();
         }).catch(error => {
@@ -35,23 +37,23 @@ const Dashboard = () => {
         });
     };
     const loadBEQExceptions = () => {
-        BEQExceptionService.getBEQException().then(data => {
-            setBEQSummaryList(data);
+        BEQExceptionService.loadBEQExceptions().then(data => {
+            setBEQSummaryList(data.data);
         });
     };
     const loadTEQExceptions = () => {
-        TEQExceptionService.getTEQException().then(data => {
-            setTEQSummaryList(data);
+        TEQExceptionService.loadTEQExceptions().then(data => {
+            setTEQSummaryList(data.data);
         });
     };
     const loadGraphicalBEQException = () => {
-        GraphicalBEQExceptionService.getGraphicalBEQException().then(data => {
-            setLnChartData(data);
+        GraphicalBEQExceptionService.loadGraphicalBEQException().then(data => {
+            setLnChartData(data.data);
         });
     };
     const loadGraphicalTEQException = () => {
-        GraphicalTEQExceptionService.getGraphicalTEQException().then(data => {
-            setTeqLnChartData(data);
+        GraphicalTEQExceptionService.loadGraphicalTEQException().then(data => {
+            setTeqLnChartData(data.data);
         });
     };
     return (
