@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Modal, Button } from 'react-bootstrap';
 import { NotificationManager } from 'react-notifications';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import ReportingService from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psReporting.service.ts';
 function PsReportingComponent() {
     const [orderToInvalidate, setOrderToInvalidate] = useState([]);
     const [inValidBtnEnable, setInValidBtnEnable] = useState(true);
@@ -24,13 +24,12 @@ function PsReportingComponent() {
     const [showDates, setShowDates] = useState(true);
     const [showRefNum, setShowRefNum] = useState(false);
     useEffect(() => {
-        // Assuming fetchTenant and initial search would be available as Async functions
         fetchTenant();
         search();
     }, []);
     const fetchTenant = async () => {
         try {
-            const response = await axios.get('/Security/GetTenant');
+            const response = await ReportingService.fetchTenant();
             setLoggedTenant(response.data);
             setTogglingTenant(response.data);
             // columnToggle would be handled directly inside rendering as conditional rendering
@@ -46,7 +45,7 @@ function PsReportingComponent() {
     };
     const inValidateProcess = async () => {
         try {
-            const response = await axios.post('/ReportingController/InvalidateOrderData', orderToInvalidate);
+            await ReportingService.invalidateOrderData({ orderToInvalidate });
             setOrderToInvalidate([]);
             setInValidBtnEnable(true);
             search(); // Simplified refresh data after invalidation
@@ -65,9 +64,9 @@ function PsReportingComponent() {
                     Fromdate: fromDate.toISOString(),
                     ThroughDate: throughDate.toISOString(),
                 };
-                response = await axios.post(`/ReportingController/GetReportDetails/${togglingTenant}`, details);
+                response = await ReportingService.getReportDetails(togglingTenant, details);
             } else {
-                response = await axios.get(`/ReportingController/GetReportDetailsFilter/${filterSection}/${togglingTenant}`);
+                response = await ReportingService.getReportDetailsFilter({ filterSection, togglingTenant });
             }
             setServiceGridData(response.data);
             setBusy(false);
