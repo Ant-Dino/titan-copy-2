@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { DatePicker, message, Button } from 'antd';
 import moment from 'moment';
 import 'antd/dist/antd.css';
-
+import SecurityService from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psReporting.service';
 const ReportingComponent = () => {
   const [orderToInvalidate, setOrderToInvalidate] = useState([]);
   const [inValidBtnEnable, setInValidBtnEnable] = useState(true);
@@ -28,38 +27,33 @@ const ReportingComponent = () => {
   ]);
   const [validateError, setValidateError] = useState(false);
   const [tenant, setTenant] = useState('');
-
   useEffect(() => {
     checkAccessAndFetchTenant();
   }, []);
-
   const checkAccessAndFetchTenant = async () => {
     try {
-      const userInfo = await axios.get('/Security/GetUserInfo');
-      const { ActivityRight, CanManageTEQ, CanManageBEQ } = userInfo.data;
+      const userInfo = await SecurityService.getUserInfo();
+      const { ActivityRight, CanManageTEQ, CanManageBEQ } = userInfo;
       if (ActivityRight === 'Admin' || ActivityRight === 'SuperAdmin') {
         setHasAccess(true);
       }
       if (ActivityRight === 'SuperAdmin') {
         setHasSuperAccess(true);
       }
-      const tenantInfo = await axios.get('Security/GetTenant');
-      setTenant(tenantInfo.data);
-      setLoggedTenant(tenantInfo.data);
-      setTogglingTenant(tenantInfo.data);
+      const tenantInfo = await SecurityService.getTenant();
+      setTenant(tenantInfo);
+      setLoggedTenant(tenantInfo);
+      setTogglingTenant(tenantInfo);
     } catch (error) {
       message.error('An error occurred while fetching user and tenant information.');
     }
   };
-
   const invalidateConfirm = () => {
     // Confirm Invalidate logic goes here
   };
-
   const invalidateProcess = () => {
     // Invalidate process logic goes here
   };
-
   const changeSelect = (item) => {
     if (item === '1') {
       setDisableDate(false);
@@ -67,7 +61,6 @@ const ReportingComponent = () => {
       setDisableDate(true);
     }
   };
-
   const validateDate = () => {
     const startDate = moment(fromDate).toDate();
     const endDate = moment(throughDate).toDate();
@@ -77,11 +70,9 @@ const ReportingComponent = () => {
       setValidateError(false);
     }
   };
-
   const search = () => {
     // Search logic goes here
   };
-
   return (
     <div>
       {hasAccess && <p>You have admin or super admin access</p>}
@@ -92,5 +83,4 @@ const ReportingComponent = () => {
     </div>
   );
 };
-
 export default ReportingComponent;
