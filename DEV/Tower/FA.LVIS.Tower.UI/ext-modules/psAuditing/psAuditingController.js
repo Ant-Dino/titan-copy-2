@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { AuditingService } from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psAuditing.service';
 import { growl } from 'growl-alert';
 import Modal from './Modal'; //Assuming you have a modal component for editing
 const AuditingComponent = () => {
@@ -25,14 +25,13 @@ const AuditingComponent = () => {
     const [busy, setBusy] = useState(false);
 
     useEffect(() => {
-        // Assuming getUserInfo() is the method that retrieves user information like 'activityright'
         const fetchData = async () => {
             try {
-                let response = await getUserInfo();
-                setActivityRight(response.ActivityRight);
-                setCanManageTEQ(response.CanManageTEQ);
-                setCanManageBEQ(response.CanManageBEQ);
-                if (['SuperAdmin', 'Admin'].includes(response.ActivityRight)) {
+                let response = await AuditingService.getUserInfo();
+                setActivityRight(response.data.ActivityRight);
+                setCanManageTEQ(response.data.CanManageTEQ);
+                setCanManageBEQ(response.data.CanManageBEQ);
+                if (['SuperAdmin', 'Admin'].includes(response.data.ActivityRight)) {
                     setHasAccess(true);
                 }
             } catch (error) {
@@ -58,21 +57,26 @@ const AuditingComponent = () => {
             return;
         }
 
-        let url = 'AuditController/GetAuditDetailsFilter/' + filterSection;
         if (filterSection === "1") {
-            url = 'api/audit/GetAuditDetails/';
-        }
-
-        try {
-            setBusy(true);
-            const response = await axios.get(url, {
-                params: { search: '', Fromdate: fromDate, ThroughDate: throughDate },
-            });
-            setGridData(response.data);
-        } catch (error) {
-            growl.error(error.message);
-        } finally {
-            setBusy(false);
+            try {
+                setBusy(true);
+                const response = await AuditingService.getAuditDetails({ Fromdate: fromDate, ThroughDate: throughDate });
+                setGridData(response.data);
+            } catch (error) {
+                growl.error(error.message);
+            } finally {
+                setBusy(false);
+            }
+        } else {
+            try {
+                setBusy(true);
+                const response = await AuditingService.getAuditDetailsFilter(filterSection, { search: '', Fromdate: fromDate, ThroughDate: throughDate });
+                setGridData(response.data);
+            } catch (error) {
+                growl.error(error.message);
+            } finally {
+                setBusy(false);
+            }
         }
     };
 
