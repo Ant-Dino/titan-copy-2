@@ -1,10 +1,8 @@
- 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
 import { useHistory } from 'react-router-dom';
 import { Growl } from 'primereact/growl';
-
+import SecurityService from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psSecurity.service.ts';
 function PsSecurityComponent() {
     const [activityRight, setActivityRight] = useState('');
     const [canManageTEQ, setCanManageTEQ] = useState(false);
@@ -17,25 +15,21 @@ function PsSecurityComponent() {
     const [tenantName, setTenantName] = useState('');
     const history = useHistory();
     const growl = useRef(null);
-
     useEffect(() => {
         getUserInfo();
     }, []);
-
     const getUserInfo = async () => {
         try {
-            const response = await axios.get('/Security/GetCurrentUser/');
-            const { ActivityRight, CanManageTEQ, CanManageBEQ } = response.data;
+            const response = await SecurityService.getCurrentUser();
+            const { ActivityRight, CanManageTEQ, CanManageBEQ } = response;
             setActivityRight(ActivityRight);
             setCanManageTEQ(CanManageTEQ);
             setCanManageBEQ(CanManageBEQ);
-
             checkAccess(ActivityRight);
         } catch (error) {
             console.log("Error getting user info", error);
         }
     };
-
     const checkAccess = (right) => {
         if (right === 'Admin' || right === 'SuperAdmin') {
             setHasAccess(true);
@@ -47,31 +41,25 @@ function PsSecurityComponent() {
             history.push('/dashboard');
         }
     };
-
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('/Security/GetUsers');
-            setUsers(response.data);
+            const response = await SecurityService.getUsers();
+            setUsers(response);
         } catch (error) {
             console.log("Error fetching users", error);
         }
     };
-
     useEffect(() => {
         if (activityRight) fetchUsers();
     }, [activityRight]);
-
     const fetchTenants = async () => {
-        const response = await axios.get('/Security/GetTenant');
-        setTenants(response.data);
+        const response = await SecurityService.getTenant();
+        setTenants(response);
     };
-
     useEffect(() => {
         fetchTenants();
     }, []);
-
     // Additional functions (e.g., addRow, editRow, deleteRow) will need to be implemented here.
-
     return (
         <div>
             {hasAccess ? (
@@ -85,5 +73,4 @@ function PsSecurityComponent() {
         </div>
     );
 }
-
 export default PsSecurityComponent;
