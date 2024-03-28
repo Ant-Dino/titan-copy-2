@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Modal } from './ModalComponent'; // Assuming you have a Modal component
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { toast } from 'react-toastify';
-
+import PsReportingService from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psReporting.service';
 const PsReportingComponent = () => {
   const [orderToInvalidate, setOrderToInvalidate] = useState([]);
   const [inValidBtnEnable, setInValidBtnEnable] = useState(true);
@@ -27,10 +26,9 @@ const PsReportingComponent = () => {
   const [busyRef, setBusyRef] = useState(false);
   const [disableReferenceNo, setDisableReferenceNo] = useState(true);
   const [reportTitle, setReportTitle] = useState('Orders Summary');
-
   useEffect(() => {
     // Assuming retrieveTenantName is the function to get tenant info
-    axios.get('/Security/GetTenant').then(response => {
+    PsReportingService.getTenant().then(response => {
       setLoggedTenant(response.data);
       setTogglingTenant(response.data);
     });
@@ -38,27 +36,22 @@ const PsReportingComponent = () => {
     // Load initial data
     search();
   }, []);
-
   const inValidateConfirm = () => {
     // Confirm modal logic here
     if (window.confirm('Are you sure you want to Invalidate selected order(s)?')) {
       inValidateProcess();
     }
   };
-
   const inValidateProcess = () => {
     console.log("entered invalidate process method.");
     // Invalidate axios call here
   };
-
   const changeSelect = (item) => {
     setDisableDate(item !== '1');
   };
-
   const validateDate = () => {
     setValidateError(throughDate < fromDate);
   };
-
   const search = () => {
     setReportTitle('Orders Summary');
     validateDate();
@@ -68,15 +61,13 @@ const PsReportingComponent = () => {
     }
     // Fetch data based on date range
     setBusy(true);
-    // Assuming fetchData is the function to fetch data
     // Replace 'path-to-API' with the actual path and modify the request payload as needed.
-    axios.post('/ReportingController/GetReportDetails/', { togglingTenant, fromDate, throughDate })
+    PsReportingService.getReportDetails({ togglingTenant, fromDate, throughDate })
       .then(response => {
         setData(response.data);
         setBusy(false);
       });
   };
-
   const searchbyReferenceNo = () => {
     if (referenceNo !== '') {
       setBusyRef(true);
@@ -85,7 +76,6 @@ const PsReportingComponent = () => {
       setBusyRef(false);
     }
   };
-
   return (
     <div>
       <h2>{reportTitle}</h2>
@@ -103,5 +93,4 @@ const PsReportingComponent = () => {
     </div>
   );
 };
-
 export default PsReportingComponent;
