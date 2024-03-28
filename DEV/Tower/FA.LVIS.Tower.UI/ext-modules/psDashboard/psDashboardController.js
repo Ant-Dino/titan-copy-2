@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUser, getTEQException, getBEQException, getGraphicalTEQException, getGraphicalBEQException } from './services/DashboardService';
+import dashboardService from '../services/psDashboard.service';
 
 const Dashboard = () => {
   const [currentUser, setCurrentUser] = useState({});
@@ -31,7 +31,7 @@ const Dashboard = () => {
   }, [currentUser]);
 
   const getCurrentUser = () => {
-    getUser().then(response => {
+    dashboardService.getUser().then(response => {
       setCurrentUser(response);
       if (response.CanManageTEQ) loadTEQExceptions();
       if (response.CanManageBEQ) loadBEQExceptions();
@@ -39,25 +39,25 @@ const Dashboard = () => {
   };
 
   const loadTEQExceptions = () => {
-    getTEQException().then(data => {
+    dashboardService.getTEQException().then(data => {
       setTEQSummaryList(data);
     });
   };
 
   const loadBEQExceptions = () => {
-    getBEQException().then(data => {
+    dashboardService.getBEQException().then(data => {
       setBEQSummaryList(data);
     });
   };
 
   const loadGraphicalTEQException = () => {
-    getGraphicalTEQException().then(data => {
+    dashboardService.getGraphicalTEQException().then(data => {
       setGraphDataTEQ(data);
     });
   };
 
   const loadGraphicalBEQException = () => {
-    getGraphicalBEQException().then(data => {
+    dashboardService.getGraphicalBEQException().then(data => {
       setGraphDataBEQ(data);
     });
   };
