@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUser, LoadBEQExceptions, LoadTEQExceptions, LoadGraphicalBEQException, LoadGraphicalTEQException } from './services/DashboardService';
+import { getUser, LoadBEQExceptions, LoadTEQExceptions } from 'DEV/Tower/FA.LVIS.Tower.UI/src/services/psDashboard.service';
 const Dashboard = () => {
   const [user, setUser] = useState({});
   const [activityRight, setActivityRight] = useState('');
@@ -13,7 +13,7 @@ const Dashboard = () => {
   useEffect(() => {
     getCurrentUser();
     // Removed $interval replacement for LoadTEQExceptions and LoadBEQExceptions since useEffect with setTimeout should be handled carefully without causing infinite loops
-  }, []);
+  }, []); 
   const getCurrentUser = () => {
     getUser().then(response => {
       setUser(response);
