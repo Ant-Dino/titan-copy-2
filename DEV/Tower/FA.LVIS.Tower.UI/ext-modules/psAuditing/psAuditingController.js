@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
-import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from 'react-toastify';
-// Assuming the axios API calls are correctly set in the services directory
+// Importing axios service
 import { getAuditDetails, getAuditDetailsFilter } from './services/psAuditingApi';
 function AuditingComponent() {
   const [activityRight, setActivityRight] = useState('');
